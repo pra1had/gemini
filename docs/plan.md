@@ -11,36 +11,36 @@ Scenario Workbench is a web application designed to help Product Owners (POs) an
 *Goal: Build main UI layout, flow panel interactions (add/remove/reorder), inline step expansion, basic grid component. Use mock data.*
 *Key Deliverable: Clickable prototype of core scenario building flow.*
 
-- [ ] **Project Setup (Initial)**
-  - [ ] Initialize Git repository for the main application.
-  - [ ] Define required tools (Node.js version, package manager, IDE extensions).
-  - [ ] Choose and set up Frontend framework/structure (e.g., React, Vue, Angular - **Decision Needed**).
-  - [ ] Choose and integrate a UI component library (e.g., Material UI, Ant Design, Bootstrap) or plan for custom components.
-  - [ ] Set up basic project structure (folders for source, tests, docs, config).
-  - [ ] Set up linters and formatters (e.g., ESLint, Prettier).
-  - [ ] Create `README.md` with basic setup instructions.
-- [ ] **Frontend Foundation (Phase 1 Focus)**
-  - [ ] Implement client-side routing (e.g., React Router, Vue Router).
-  - [ ] Define main application routes (Search [Placeholder], Create/Edit).
-  - [ ] Choose and set up state management solution (e.g., Redux, Zustand, Vuex, Pinia, NgRx).
-  - [ ] Define initial state structure for scenarios (using mock data).
-  - [ ] Create main application layout component (header, navigation placeholder, content area).
-  - [ ] Create basic API Client Service (using mock functions).
-- [ ] **Scenario Building UI (Core Flow - US-001, US-003, US-004)**
-  - [ ] Implement "Create Scenario" action (placeholder for metadata).
-  - [ ] Implement UI for the "Your Flow" panel.
-  - [ ] Implement adding Actions (from a mock list) to the flow (click/drag).
-  - [ ] Implement reordering steps within the flow.
-  - [ ] Implement removing steps from the flow.
-  - [ ] Implement inline expansion/collapse for steps in the flow panel.
-- [ ] **Step Data Entry UI (Basic Grid - Part of US-005)**
+- [x] **Project Setup (Initial)** (Migrated to Next.js)
+  - [ ] Initialize Git repository for the main application. (Assumed external)
+  - [ ] Define required tools (Node.js version, package manager, IDE extensions). (Assumed external)
+  - [x] Choose and set up Frontend framework/structure (Next.js with App Router).
+  - [x] Choose and integrate a UI component library (Material UI v6).
+  - [x] Set up basic project structure (Next.js `src` directory structure).
+  - [x] Set up linters and formatters (ESLint via `create-next-app`).
+  - [x] Create `README.md` with basic setup instructions (`create-next-app` default).
+- [x] **Frontend Foundation (Phase 1 Focus)**
+  - [x] Implement client-side routing (Next.js App Router).
+  - [x] Define main application routes (Search `/`, Create `/create`, Edit `/edit/[scenarioId]`).
+  - [x] Choose and set up state management solution (Zustand).
+  - [x] Define initial state structure for scenarios (using mock data in Zustand store).
+  - [x] Create main application layout component (`src/components/Layout.tsx`).
+  - [ ] Create basic API Client Service (using mock functions). (Mock data handled directly in store for now)
+- [x] **Scenario Building UI (Core Flow - US-001, US-003, US-004)**
+  - [x] Implement "Create Scenario" action (placeholder via `/create` route).
+  - [x] Implement UI for the "Your Flow" panel (`CreateEditPageComponent`).
+  - [x] Implement adding Actions (from a mock list) to the flow (click implemented).
+  - [x] Implement reordering steps within the flow (dnd-kit implemented).
+  - [x] Implement removing steps from the flow (delete button implemented).
+  - [x] Implement inline expansion/collapse for steps in the flow panel.
+- [x] **Step Data Entry UI (Basic Grid - Part of US-005)**
   - [ ] Develop the *basic* "Excel-like" grid component:
-    - [ ] Static rendering based on mock Action type.
-    - [ ] Basic data display from mock state.
-    - [ ] Placeholder for data input.
-- [ ] **Mock Data**
-  - [ ] Create mock Action List data.
-  - [ ] Create mock Scenario data structure for state management.
+    - [x] Static rendering based on mock Action type (Placeholder exists).
+    - [x] Basic data display from mock state (Placeholder exists).
+    - [x] Placeholder for data input (Placeholder exists).
+- [x] **Mock Data**
+  - [x] Create mock Action List data (in Zustand store).
+  - [x] Create mock Scenario data structure for state management (in Zustand store).
 
 ---
 
