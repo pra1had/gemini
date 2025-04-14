@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Python / Flask Backend
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/.env* # If backend uses its own .env
+# Add other Python-specific ignores if needed (e.g., instance folder for Flask)
+# backend/instance/

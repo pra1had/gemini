@@ -1,0 +1,44 @@
+# Configuration for Scenario Workbench Backend
+
+# --- General Settings ---
+# log_level: INFO # Example: DEBUG, INFO, WARNING, ERROR
+
+# --- Middleware API Discovery ---
+openapi_sources:
+  - type: local # Options: local, git, url
+    path: docs/resources/ActionCodeList.json # Example path for local file (adjust as needed)
+  # - type: git
+  #   repo_url: https://github.com/your-org/your-repo.git
+  #   branch: main
+  #   file_path: path/to/openapi.yaml
+  # - type: url
+  #   url: https://your-api.com/openapi.json
+
+# --- Temporary Persistence (Phase 2/3 - To be removed in Phase 4) ---
+# temporary_storage_path: ./temp_scenarios # Example path for storing Markdown files temporarily
+
+# --- GitHub Integration (Phase 4) ---
+github:
+  service_account_token: "YOUR_GITHUB_TOKEN_HERE" # Store securely (e.g., env variable, secrets manager)
+  default_target_branch: "main"
+  repositories: # List of repos the tool can interact with
+    # - name: "Repo Name 1"
+    #   url: "https://github.com/your-org/repo1.git"
+    #   component_mapping: ["ComponentA", "ComponentB"] # Components whose scenarios go here
+    # - name: "Repo Name 2"
+    #   url: "https://github.com/your-org/repo2.git"
+    #   component_mapping: ["ComponentC"]
+  component_to_repo_mapping: # Derived/used for saving based on scenario component
+    # ComponentA: "https://github.com/your-org/repo1.git"
+    # ComponentB: "https://github.com/your-org/repo1.git"
+    # ComponentC: "https://github.com/your-org/repo2.git"
+    DefaultComponent: "../" # Example: Map a component to the local repo for testing
+
+# --- Authentication & Authorization (Phase 4) ---
+auth:
+  # Mechanism TBD - Placeholder for user roles
+  user_roles:
+    # "user1@example.com": "PO"
+    # "user2@example.com": "QA"
+    # "developer@example.com": "Developer"
+    "placeholder_user": "PO" # Default placeholder for Phase 2 development

@@ -1,17 +1,25 @@
 import { create } from 'zustand';
+import { fetchActionList } from '@/services/apiClient'; // Import the API client function
 
 // --- Interfaces ---
+// Updated Action interface to match ActionCodeList.json structure
 export interface Action {
-  id: string;
-  code: string; // User-friendly name/code
+  actionCode: string; // Use actionCode as the primary identifier and display name source
   componentName: string;
   actionCodeGroupName: string;
-  type: 'SimpleCommand' | 'SetAndExecute' | 'PostAndVerify' | 'FetchAndVerify'; // Example types
+  type: 'SimpleCommand' | 'SetAndExecute' | 'PostAndVerify' | 'FetchAndVerify'; // Ensure these types match JSON values
+  endPoint?: string; // Add optional fields from JSON
+  pathPropertyListMap?: any; // Add optional fields from JSON (use a more specific type later if needed)
+  // Note: We are removing the separate 'id' and 'code' fields
 }
+
+// Define a type for the row data within a step's grid
+export type StepRowData = Record<string, any> & { id: number | string }; // Ensure each row has a unique id
 
 export interface ScenarioStep {
   id: string; // Unique ID for the step instance in the flow
-  actionId: string; // ID of the Action definition
+  actionCode: string; // Reference the Action using its actionCode
+  stepData: StepRowData[]; // Array to hold data for this step's grid
 }
 
 interface ScenarioState {
@@ -25,10 +33,12 @@ interface ScenarioState {
 
 interface ScenarioActions {
   setScenarioName: (name: string) => void;
-  setAvailableActions: (actions: Action[]) => void;
+  setAvailableActions: (actions: Action[]) => void; // Keep this setter
+  fetchAndSetAvailableActions: () => Promise<void>; // Add fetch action
   setFlowSteps: (steps: ScenarioStep[]) => void;
   addFlowStep: (action: Action) => void;
   removeFlowStep: (stepId: string) => void;
+  updateStepData: (stepId: string, newStepData: StepRowData[]) => void; // Action to update step data
   reorderFlowSteps: (steps: ScenarioStep[]) => void;
   toggleStepExpansion: (stepId: string) => void;
   loadScenario: (scenarioId: string | null) => void;
@@ -38,13 +48,7 @@ interface ScenarioActions {
 // --- Initial State ---
 const initialState: ScenarioState = {
   scenarioName: '',
-  availableActions: [
-    { id: 'act1', code: 'Create User', componentName: 'User Service', actionCodeGroupName: 'CRUD', type: 'PostAndVerify' },
-    { id: 'act2', code: 'Get User Details', componentName: 'User Service', actionCodeGroupName: 'Read', type: 'FetchAndVerify' },
-    { id: 'act3', code: 'Update User Profile', componentName: 'User Service', actionCodeGroupName: 'CRUD', type: 'SetAndExecute' },
-    { id: 'act4', code: 'Place Order', componentName: 'Order Service', actionCodeGroupName: 'Core', type: 'PostAndVerify' },
-    { id: 'act5', code: 'Get Order Status', componentName: 'Order Service', actionCodeGroupName: 'Read', type: 'FetchAndVerify' },
-  ],
+  availableActions: [], // Initialize as empty, will be fetched
   flowSteps: [],
   isEditMode: false,
   currentScenarioId: null,
@@ -56,13 +60,30 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>((set, ge
   ...initialState,
 
   setScenarioName: (name) => set({ scenarioName: name }),
-  setAvailableActions: (actions) => set({ availableActions: actions }),
+  setAvailableActions: (actions) => set({ availableActions: actions }), // Keep internal setter
+
+  fetchAndSetAvailableActions: async () => {
+    try {
+      const actions = await fetchActionList();
+      set({ availableActions: actions });
+    } catch (error) {
+      console.error("Failed to fetch and set available actions:", error);
+      // Optionally set some error state in the store
+      set({ availableActions: [] }); // Set to empty on error
+    }
+  },
+
   setFlowSteps: (steps) => set({ flowSteps: steps }),
 
   addFlowStep: (action) => {
+    // TODO: Initialize stepData based on action.type or fetched schema later
+    // For now, initialize with an empty array or a default row
+    const initialData: StepRowData[] = [{ id: 1, parameter: 'param1', value: '' }]; // Example initial row
+
     const newStep: ScenarioStep = {
       id: `step-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`, // More unique ID
-      actionId: action.id,
+      actionCode: action.actionCode, // Use actionCode from the updated Action interface
+      stepData: initialData, // Initialize step data
     };
     set((state) => ({ flowSteps: [...state.flowSteps, newStep] }));
   },
@@ -70,6 +91,14 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>((set, ge
   removeFlowStep: (stepId) => {
     set((state) => ({
       flowSteps: state.flowSteps.filter((step) => step.id !== stepId),
+    }));
+  },
+
+  updateStepData: (stepId, newStepData) => {
+    set((state) => ({
+      flowSteps: state.flowSteps.map((step) =>
+        step.id === stepId ? { ...step, stepData: newStepData } : step
+      ),
     }));
   },
 
@@ -87,11 +116,15 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>((set, ge
     if (scenarioId) {
       set({ isEditMode: true, currentScenarioId: scenarioId });
       // TODO: Fetch existing scenario data later
+      // TODO: Fetch existing scenario data later, including stepData
+      // For now, use placeholder data with initialized stepData
+      // For now, use placeholder data with initialized stepData, using actionCode
       set({
         scenarioName: `Scenario ${scenarioId}`,
         flowSteps: [
-          { id: 'step-edit-1', actionId: 'act1' },
-          { id: 'step-edit-2', actionId: 'act4' },
+          // Replace 'act1' and 'act4' with actual actionCodes if known, otherwise use placeholders
+          { id: 'step-edit-1', actionCode: 'placeholderActionCode1', stepData: [{ id: 1, param: 'a', value: '1' }] },
+          { id: 'step-edit-2', actionCode: 'placeholderActionCode2', stepData: [{ id: 1, orderId: 'xyz', status: 'pending' }] },
         ],
       });
     } else {

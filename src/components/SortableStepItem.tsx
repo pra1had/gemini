@@ -5,7 +5,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { Paper, Grid, Typography, IconButton } from '@mui/material';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { ScenarioStep, Action } from '@/store/scenarioStore'; // Use @ alias
+import { ScenarioStep, Action, StepRowData } from '@/store/scenarioStore'; // Use @ alias, import StepRowData
+import StepDataGrid from './StepDataGrid'; // Import the new grid component
 
 interface SortableStepItemProps {
   step: ScenarioStep;
@@ -14,6 +15,7 @@ interface SortableStepItemProps {
   onRemove: (stepId: string) => void;
   expandedStepId: string | null;
   onToggleExpansion: (stepId: string) => void;
+  onUpdateData: (stepId: string, newStepData: StepRowData[]) => void; // Add the prop for updating data
 }
 
 export const SortableStepItem: React.FC<SortableStepItemProps> = ({
@@ -23,6 +25,7 @@ export const SortableStepItem: React.FC<SortableStepItemProps> = ({
   onRemove,
   expandedStepId,
   onToggleExpansion,
+  onUpdateData, // Destructure the new prop
 }) => {
   const isExpanded = expandedStepId === step.id;
 
@@ -42,7 +45,8 @@ export const SortableStepItem: React.FC<SortableStepItemProps> = ({
     cursor: 'grab',
   };
 
-  const actionDetails = availableActions.find(a => a.id === step.actionId);
+  // Find action details using actionCode now
+  const actionDetails = availableActions.find(a => a.actionCode === step.actionCode);
 
   return (
     <Paper
@@ -59,7 +63,8 @@ export const SortableStepItem: React.FC<SortableStepItemProps> = ({
         </Grid>
         <Grid item sx={{ flexGrow: 1, cursor: 'pointer' }} onClick={() => onToggleExpansion(step.id)}>
           <Typography>
-            Step {index + 1}: {actionDetails?.code || 'Unknown Action'} ({actionDetails?.type})
+            {/* Display actionCode */}
+            Step {index + 1}: {actionDetails?.actionCode || 'Unknown Action'} ({actionDetails?.type})
           </Typography>
         </Grid>
         <Grid item>
@@ -75,21 +80,18 @@ export const SortableStepItem: React.FC<SortableStepItemProps> = ({
       {isExpanded && (
         <Paper elevation={0} sx={{ p: 2, mt: 1, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
           <Typography variant="subtitle2" gutterBottom>
-            Data for: {actionDetails?.code}
-          </Typography>
-          <Paper variant="outlined" sx={{ p: 1, mt: 1, backgroundColor: 'grey.100' }}>
-            <Typography variant="caption" display="block" sx={{ fontStyle: 'italic' }}>
-              (Excel-like grid for Parameters/Request/Verification based on Action Type '{actionDetails?.type}' will go here)
+              {/* Display actionCode */}
+              Data for: {actionDetails?.actionCode}
             </Typography>
-            <Grid container spacing={1} sx={{ mt: 1 }}>
-              <Grid item xs={4}><Typography variant="body2">Field 1</Typography></Grid>
-              <Grid item xs={8}><Typography variant="body2">Value 1</Typography></Grid>
-              <Grid item xs={4}><Typography variant="body2">Field 2</Typography></Grid>
-              <Grid item xs={8}><Typography variant="body2">Value 2</Typography></Grid>
-            </Grid>
+            {/* Pass step data and update handler to the grid */}
+            <StepDataGrid
+              actionDetails={actionDetails}
+              stepId={step.id} // Pass stepId for the update handler
+              stepData={step.stepData}
+              onUpdateData={onUpdateData}
+            />
           </Paper>
-        </Paper>
-      )}
+        )}
     </Paper>
   );
 };
