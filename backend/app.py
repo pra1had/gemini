@@ -1,10 +1,19 @@
 import os
 import yaml
-from flask import Flask, jsonify, request
+import json # Keep for potential JSON operations if needed elsewhere
+from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
+import io # For sending file data
+
+# --- Local Imports ---
+from backend.models import Scenario # Import the Scenario model
+from backend.services import markdown_service # Import the markdown service
+from backend.services import excel_service # Import the excel service
 
 # --- Configuration Loading ---
-CONFIG_PATH = 'config.yaml'
+# Determine the absolute path to the config file relative to this script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(BASE_DIR, 'config.yaml')
 config = {}
 
 def load_config():
@@ -110,26 +119,42 @@ def save_scenario():
         return jsonify({"error": "Unauthorized"}), 403
 
     scenario_data = request.json
-    # --- Placeholder Logic ---
-    # TODO: Implement temporary storage (e.g., save scenario_data to a file/memory)
-    # TODO: In Phase 3, generate Markdown here before saving temporarily
-    # TODO: In Phase 4, replace with Git commit/PR logic
-    print(f"Received scenario data to save (temporary): {scenario_data.get('name', 'N/A')}")
-    # Example: Save to a temporary file named after the scenario
-    # scenario_name = scenario_data.get('name', 'untitled_scenario')
-    # temp_dir = config.get('temporary_storage_path', './temp_scenarios')
-    # os.makedirs(temp_dir, exist_ok=True)
-    # file_path = os.path.join(temp_dir, f"{scenario_name}.json") # Saving as JSON temporarily
-    # try:
-    #     with open(file_path, 'w') as f:
-    #         json.dump(scenario_data, f, indent=2)
-    #     print(f"Scenario temporarily saved to {file_path}")
-    #     return jsonify({"message": "Scenario saved temporarily", "id": scenario_name}), 200
-    # except Exception as e:
-    #     print(f"Error saving scenario temporarily: {e}")
-    #     return jsonify({"error": "Failed to save scenario temporarily"}), 500
-    return jsonify({"message": "Save endpoint placeholder hit", "id": scenario_data.get('name', 'N/A')}), 200
-    # --- End Placeholder ---
+    # --- Phase 3 Logic: Save as Markdown temporarily ---
+    try:
+        # 1. Parse incoming JSON to Scenario object
+        # Assuming frontend sends data compatible with Scenario.from_frontend_json
+        scenario = Scenario.from_frontend_json(scenario_data)
+        scenario_name = scenario.scenario_name # Use name from parsed object
+
+        # 2. Generate Markdown content
+        markdown_content = markdown_service.generate_markdown(scenario)
+
+        # 3. Get temporary storage path and ensure directory exists
+        temp_dir = config.get('temporary_storage_path', './temp_scenarios')
+        # Ensure path is relative to project root if needed (assuming config path is relative)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(base_dir)
+        effective_temp_dir = os.path.join(project_root, temp_dir)
+        os.makedirs(effective_temp_dir, exist_ok=True)
+
+        # 4. Define file path (using scenario_name, ensure it's filename-safe later if needed)
+        # Replace spaces or invalid chars if necessary for filename
+        safe_filename = scenario_name.replace(" ", "_").replace("/", "_") + ".md"
+        file_path = os.path.join(effective_temp_dir, safe_filename)
+
+        # 5. Save Markdown content to file
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(markdown_content)
+
+        print(f"Scenario temporarily saved as Markdown to {file_path}")
+        # Return the name used for the file as the ID
+        return jsonify({"message": "Scenario saved temporarily as Markdown", "id": scenario_name}), 200
+
+    except Exception as e:
+        print(f"Error saving scenario as Markdown temporarily: {e}")
+        # Consider more specific error handling (e.g., validation errors)
+        return jsonify({"error": "Failed to save scenario temporarily"}), 500
+    # --- End Phase 3 Logic ---
 
 @app.route('/api/scenarios/load/<scenario_id>', methods=['GET'])
 def load_scenario(scenario_id):
@@ -143,27 +168,42 @@ def load_scenario(scenario_id):
          # If role check needs to be stricter, adjust here
         pass # For now, allow if any role is assigned
 
-    # --- Placeholder Logic ---
-    # TODO: Implement loading from temporary storage
-    # TODO: In Phase 3, parse Markdown here after loading temporarily
-    # TODO: In Phase 4, replace with Git load logic
-    print(f"Received request to load scenario (temporary): {scenario_id}")
-    # Example: Load from temporary file
-    # temp_dir = config.get('temporary_storage_path', './temp_scenarios')
-    # file_path = os.path.join(temp_dir, f"{scenario_id}.json") # Loading JSON temporarily
-    # try:
-    #     with open(file_path, 'r') as f:
-    #         scenario_data = json.load(f)
-    #     print(f"Scenario loaded temporarily from {file_path}")
-    #     return jsonify(scenario_data), 200
-    # except FileNotFoundError:
-    #     print(f"Temporary scenario file not found: {file_path}")
-    #     return jsonify({"error": "Scenario not found"}), 404
-    # except Exception as e:
-    #     print(f"Error loading scenario temporarily: {e}")
-    #     return jsonify({"error": "Failed to load scenario temporarily"}), 500
-    return jsonify({"message": "Load endpoint placeholder hit", "id": scenario_id, "data": {"name": scenario_id, "steps": []}}), 200
-    # --- End Placeholder ---
+    # --- Phase 3 Logic: Load from temporary Markdown file ---
+    try:
+        # 1. Get temporary storage path
+        temp_dir = config.get('temporary_storage_path', './temp_scenarios')
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(base_dir)
+        effective_temp_dir = os.path.join(project_root, temp_dir)
+
+        # 2. Construct file path (assuming scenario_id is the original name)
+        # Use the same safe filename logic as in save
+        safe_filename = scenario_id.replace(" ", "_").replace("/", "_") + ".md"
+        file_path = os.path.join(effective_temp_dir, safe_filename)
+
+        # 3. Read Markdown content from file
+        with open(file_path, 'r', encoding='utf-8') as f:
+            markdown_content = f.read()
+
+        # 4. Parse Markdown content into Scenario object (using placeholder parser)
+        scenario = markdown_service.parse_markdown(markdown_content)
+        # Ensure the loaded scenario name matches the requested ID, override if parser is basic
+        if scenario.scenario_name == "Parsed Scenario (Placeholder)":
+             scenario.scenario_name = scenario_id # Use the ID if parser didn't find it
+
+        print(f"Scenario loaded temporarily from Markdown file: {file_path}")
+
+        # 5. Convert Scenario object to frontend JSON format
+        scenario_json = scenario.to_frontend_json()
+        return jsonify(scenario_json), 200
+
+    except FileNotFoundError:
+        print(f"Temporary scenario Markdown file not found: {file_path}")
+        return jsonify({"error": "Scenario not found"}), 404
+    except Exception as e:
+        print(f"Error loading scenario from Markdown temporarily: {e}")
+        return jsonify({"error": "Failed to load scenario temporarily"}), 500
+    # --- End Phase 3 Logic ---
 
 
 # --- Error Handling ---
@@ -176,6 +216,55 @@ def internal_error(error):
     # Log the error details here
     print(f"Server Error: {error}")
     return jsonify({"error": "Internal Server Error"}), 500
+
+
+@app.route('/api/scenarios/export/excel/<scenario_id>', methods=['GET'])
+def export_scenario_excel(scenario_id):
+    """
+    Phase 3: Endpoint to generate and return a scenario as a standard Excel file.
+    Loads from temporary Markdown storage.
+    Requires role check (any role can export).
+    """
+    role = get_current_user_role()
+    if not role: # Allow any authenticated role
+        pass # Adjust if stricter check needed
+
+    try:
+        # 1. Load scenario from temporary Markdown (reuse logic from load_scenario)
+        temp_dir = config.get('temporary_storage_path', './temp_scenarios')
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(base_dir)
+        effective_temp_dir = os.path.join(project_root, temp_dir)
+        safe_filename = scenario_id.replace(" ", "_").replace("/", "_") + ".md"
+        file_path = os.path.join(effective_temp_dir, safe_filename)
+
+        with open(file_path, 'r', encoding='utf-8') as f:
+            markdown_content = f.read()
+
+        scenario = markdown_service.parse_markdown(markdown_content)
+        # Ensure correct name
+        if scenario.scenario_name == "Parsed Scenario (Placeholder)":
+             scenario.scenario_name = scenario_id
+
+        # 2. Generate Excel file content (bytes)
+        excel_bytes = excel_service.generate_excel(scenario)
+
+        # 3. Send the file back to the client
+        output_filename = f"{scenario_id}.xlsx"
+        return send_file(
+            io.BytesIO(excel_bytes),
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=output_filename
+        )
+
+    except FileNotFoundError:
+        print(f"Temporary scenario Markdown file not found for export: {file_path}")
+        return jsonify({"error": "Scenario not found for export"}), 404
+    except Exception as e:
+        print(f"Error exporting scenario to Excel: {e}")
+        return jsonify({"error": "Failed to export scenario to Excel"}), 500
+
 
 # --- Main Execution ---
 if __name__ == '__main__':

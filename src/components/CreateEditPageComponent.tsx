@@ -1,10 +1,11 @@
 'use client'; // This component uses client-side hooks (useEffect, useState, Zustand, dnd-kit)
-import React, { useEffect, useState, useMemo } from 'react'; // Import useState, useMemo
+import React, { useEffect, useState, useMemo } from 'react';
 import {
-  Typography, Grid, Paper, Container, TextField, Box,
-  Accordion, AccordionSummary, AccordionDetails // Import Accordion components
+  Typography, Grid, Paper, Container, TextField, Box, Button, // Import Button
+  Accordion, AccordionSummary, AccordionDetails
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'; // Import icon for Accordion
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FileDownloadIcon from '@mui/icons-material/FileDownload'; // Icon for export button
 import {
   DndContext,
   closestCenter,
@@ -37,6 +38,7 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
   const availableActions = useScenarioStore((state) => state.availableActions);
   const flowSteps = useScenarioStore((state) => state.flowSteps);
   const isEditMode = useScenarioStore((state) => state.isEditMode);
+  const currentScenarioId = useScenarioStore((state) => state.currentScenarioId); // Get currentScenarioId
   const expandedStepId = useScenarioStore((state) => state.expandedStepId);
   const loadScenario = useScenarioStore((state) => state.loadScenario);
   const addFlowStep = useScenarioStore((state) => state.addFlowStep);
@@ -107,12 +109,74 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
     }
   };
 
+  const handleExport = () => {
+    if (!currentScenarioId) {
+      console.warn("Cannot export unsaved scenario.");
+      // Optionally show a user message/alert
+      return;
+    }
+    // Construct the backend URL
+    // Assuming backend runs on port 5001 during development
+    const exportUrl = `http://localhost:5001/api/scenarios/export/excel/${encodeURIComponent(currentScenarioId)}`;
+    console.log("Triggering export:", exportUrl);
+
+    // Trigger download by navigating or using fetch
+    // Direct navigation is simpler for GET requests triggering downloads
+    window.open(exportUrl, '_blank');
+
+    // Alternative using fetch (more complex handling of blob/filename):
+    // fetch(exportUrl)
+    //   .then(response => {
+    //     if (!response.ok) {
+    //       throw new Error(`Export failed: ${response.statusText}`);
+    //     }
+    //     // Extract filename from Content-Disposition header if possible
+    //     const disposition = response.headers.get('content-disposition');
+    //     let filename = `${currentScenarioId}.xlsx`; // Default filename
+    //     if (disposition && disposition.indexOf('attachment') !== -1) {
+    //       const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+    //       const matches = filenameRegex.exec(disposition);
+    //       if (matches != null && matches[1]) {
+    //         filename = matches[1].replace(/['"]/g, '');
+    //       }
+    //     }
+    //     return response.blob().then(blob => ({ blob, filename }));
+    //   })
+    //   .then(({ blob, filename }) => {
+    //     const url = window.URL.createObjectURL(blob);
+    //     const a = document.createElement('a');
+    //     a.href = url;
+    //     a.download = filename;
+    //     document.body.appendChild(a);
+    //     a.click();
+    //     a.remove();
+    //     window.URL.revokeObjectURL(url);
+    //   })
+    //   .catch(error => {
+    //     console.error("Export error:", error);
+    //     // Show error message to user
+    //   });
+  };
+
+
   return (
     <Layout>
-      <Container> {/* Added Container */}
-        <Typography variant="h4" gutterBottom>
-          {isEditMode ? `Edit Scenario: ${scenarioName}` : 'Create New Scenario'}
-        </Typography>
+      <Container>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h4">
+            {isEditMode ? `Edit Scenario: ${scenarioName}` : 'Create New Scenario'}
+          </Typography> {/* Close Typography tag here */}
+          {/* Add Export Button Here */}
+          <Button
+            variant="outlined"
+            startIcon={<FileDownloadIcon />}
+            onClick={handleExport}
+            disabled={!currentScenarioId} // Disable if no scenario ID (not saved yet)
+          >
+            Export to Excel
+          </Button>
+        </Box>
+        {/* Removed the misplaced closing </Typography> tag from here */}
 
         <Grid container spacing={3}>
           {/* Left Panel: Available Actions */}
@@ -202,7 +266,10 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
             </Paper>
           </Grid>
         </Grid>
-        {/* TODO: Add Review/Save buttons */}
+        {/* TODO: Add Review/Save buttons (Phase 4) */}
+        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+           {/* Placeholder for Save/Review buttons */}
+        </Box>
       </Container>
     </Layout>
   );

@@ -24,9 +24,13 @@ source "$VENV_ACTIVATE"
 #     exit 1
 # fi
 
-# Start the Flask application
-echo "Starting Flask development server..."
-python "$SCRIPT_DIR/app.py"
+# Ensure we are in the project root directory (one level up from script dir)
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+cd "$PROJECT_ROOT"
+
+# Start the Flask application as a module from the project root
+echo "Starting Flask development server as module 'backend.app' from $(pwd)..."
+python -m backend.app
 
 # Deactivate environment when script exits (optional, usually handled by shell)
 # echo "Deactivating virtual environment..."
