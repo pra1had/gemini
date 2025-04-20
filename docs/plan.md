@@ -49,23 +49,23 @@ Scenario Workbench is a web application designed to help Product Owners (POs) an
 *Key Deliverable: Functional UI connected to backend, temporary scenario persistence, rich grid editing.*
 
 - [ ] **Project Setup (Backend & Config)**
-  - [ ] Choose and set up Backend framework/structure (e.g., Node.js with Express, Python with Flask/Django).
-  - [ ] Initialize Git repository for Middleware (if separate).
-  - [ ] Define structure for configuration files (e.g., JSON, YAML).
+  - [x] Choose and set up Backend framework/structure (e.g., Node.js with Express, Python with Flask/Django).
+  - [x] Initialize Git repository for Middleware (if separate).
+  - [x] Define structure for configuration files (e.g., JSON, YAML).
   - [ ] Implement loading mechanism for:
     - [ ] OpenAPI specification source location(s).
     - [ ] (Placeholders for other configs: GitHub repos, User Roles, Token, Component->Repo mapping).
 - [ ] **Backend Foundation (Phase 2 Focus)**
-  - [ ] Set up basic API routing.
-  - [ ] Define standard API response format.
+  - [x] Set up basic API routing.
+  - [x] Define standard API response format.
   - [ ] Implement health check endpoint (`/health`).
-  - [ ] Set up logging framework.
-  - [ ] Implement base error handling middleware.
+  - [x] Set up logging framework.
+  - [x] Implement base error handling middleware.
 - [ ] **Middleware API Discovery (Backend - Part of Functional Req)**
-  - [ ] Implement service to fetch OpenAPI specs from configured Git source(s).
-  - [ ] Implement robust OpenAPI parsing logic.
-  - [ ] Implement logic to generate the structured "Action List".
-  - [ ] Create API endpoint (`/api/actions`) to return the Action List.
+  - [x] Implement service to fetch OpenAPI specs from configured Git source(s).
+  - [x] Implement robust OpenAPI parsing logic.
+  - [x] Implement logic to generate the structured "Action List".
+  - [x] Create API endpoint (`/api/actions`) to return the Action List.
 - [ ] **Backend (Temporary Persistence)**
   - [ ] Define internal representation/model for a Scenario (metadata, steps, data).
   - [ ] Implement temporary in-memory or simple file-based storage for scenarios (to be replaced in Phase 4).

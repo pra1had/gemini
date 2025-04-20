@@ -77,7 +77,7 @@ public class ActionCodeControllerIntegrationTest {
     @Test
     void testGetActionCodes() throws Exception {
         // Perform GET request to the controller endpoint
-        mockMvc.perform(get("/api/action-codes")
+        mockMvc.perform(get("/api/actions") // Corrected endpoint path
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))

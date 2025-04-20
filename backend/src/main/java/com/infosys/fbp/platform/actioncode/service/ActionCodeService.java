@@ -366,25 +366,26 @@ public class ActionCodeService {
                     // If it's an object (or a ref that resolves to one), recurse
                      // Pass the 'required' list of the *object schema itself*
                     flattenSchemaGeneric(actualPropertySchema, openAPI, newPath, columns, Optional.ofNullable(actualPropertySchema.getRequired()), pathPrefix); // Pass prefix
-                } else {
-                    // Basic type, add to list - Create appropriate DTO type
-                    String derivedDataType = calculateDerivedDataType(newPath, pathPrefix);
+                 } else {
+                     // Basic type, add to list - Create appropriate DTO type
+                     // Use currentPath (parent path) for derivedDataType as per test expectation
+                     String derivedDataType = calculateDerivedDataType(currentPath, pathPrefix); // Use currentPath
 
-                    if (":request".equals(pathPrefix)) {
-                        RequestBodyColumnInfo columnInfo = new RequestBodyColumnInfo();
+                     if (":request".equals(pathPrefix)) {
+                         RequestBodyColumnInfo columnInfo = new RequestBodyColumnInfo();
                         columnInfo.setTechnicalColumnName(propertyName);
-                        columnInfo.setMandatory(isMandatory);
-                        columnInfo.setDerivedDataType(derivedDataType);
-                        columns.add(columnInfo);
-                    } else if (":response".equals(pathPrefix)) {
-                        ResponseBodyColumnInfo columnInfo = new ResponseBodyColumnInfo();
-                        columnInfo.setTechnicalColumnName(propertyName);
-                        // Note: 'mandatory' for response might mean 'defined' or 'always present'
-                        // Use the 'isMandatory' flag derived from the parent schema's required list.
-                        columnInfo.setMandatory(isMandatory); // Use the calculated mandatory status
-                        columnInfo.setDerivedDataType(derivedDataType);
-                        columns.add(columnInfo);
-                    } else {
+                         columnInfo.setMandatory(isMandatory);
+                         columnInfo.setDerivedDataType(derivedDataType); // Set using parent path
+                         columns.add(columnInfo);
+                     } else if (":response".equals(pathPrefix)) {
+                         ResponseBodyColumnInfo columnInfo = new ResponseBodyColumnInfo();
+                         columnInfo.setTechnicalColumnName(propertyName);
+                         // Note: 'mandatory' for response might mean 'defined' or 'always present'
+                         // Use the 'isMandatory' flag derived from the parent schema's required list.
+                         columnInfo.setMandatory(isMandatory); // Use the calculated mandatory status
+                         columnInfo.setDerivedDataType(derivedDataType); // Set using parent path
+                         columns.add(columnInfo);
+                     } else {
                          log.warn("Unknown path prefix '{}' during schema flattening.", pathPrefix);
                     }
                 }
@@ -399,18 +400,16 @@ public class ActionCodeService {
          // Potentially handle other schema types if necessary
     }
 
-    // Helper to calculate derivedDataType consistently
-    private String calculateDerivedDataType(String fullPath, String prefix) {
-         int colonCount = fullPath.length() - fullPath.replace(":", "").length();
-         if (colonCount <= 1) { // Top-level property (e.g., ":id") or empty path
-             return prefix;
-         } else { // Nested property (e.g., ":props:id")
-             // Extract parent path (e.g., ":props" from ":props:id")
-             String parentPath = fullPath.substring(0, fullPath.lastIndexOf(':'));
-             // Construct the final path like ":request:props" or ":response:props"
-             return prefix + parentPath; // parentPath already starts with ":"
-         }
-    }
+     // Helper to calculate derivedDataType consistently
+     // Returns the path of the parent object, prefixed by ':request:' or ':response:'
+     private String calculateDerivedDataType(String parentPath, String prefix) {
+         // If parentPath is empty (root level), just return the prefix.
+         // Otherwise, combine prefix and parentPath.
+         // parentPath might be "" or ":object" or ":object:nested"
+         // prefix is ":request" or ":response"
+         // Example: :request + "" -> :request, :request + :props -> :request:props
+         return prefix + parentPath;
+     }
 
 
     // Helper to find a schema by its $ref (#/components/schemas/SchemaName)
