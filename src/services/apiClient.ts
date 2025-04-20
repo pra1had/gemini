@@ -1,6 +1,6 @@
-import { Action } from '@/store/scenarioStore'; // Assuming Action type is defined here
+import { Action, ScenarioDto } from '@/store/scenarioStore'; // Import ScenarioDto
 
-const API_BASE_URL = 'http://localhost:5001'; // Python Backend server address
+const API_BASE_URL = 'http://localhost:5001'; // Python Backend server address (Keep for reference or remove if unused)
 const JAVA_API_BASE_URL = 'http://localhost:8080'; // Java Backend server address
 
 /**
@@ -35,9 +35,10 @@ export const checkBackendHealth = async (): Promise<boolean> => {
             return false;
         }
         const data = await response.json();
-        return data.status === 'healthy';
+        // Check for the status returned by the Java backend
+        return data.status === 'UP';
     } catch (error) {
-        console.error("Error during backend health check:", error);
+        console.error("Error during Java backend health check:", error);
         return false;
     }
 };
@@ -46,12 +47,13 @@ export const checkBackendHealth = async (): Promise<boolean> => {
 // --- Placeholder functions for future implementation ---
 
 /**
- * Saves scenario data to the backend (temporary persistence).
+ * Saves scenario data to the Java backend (temporary persistence).
  * @param scenarioData - The scenario data object to save.
  */
-export const saveScenarioTemporary = async (scenarioData: any): Promise<any> => {
+export const saveScenarioTemporary = async (scenarioData: ScenarioDto): Promise<ScenarioDto> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/scenarios/save`, {
+        // Use Java backend URL and endpoint
+        const response = await fetch(`${JAVA_API_BASE_URL}/api/scenarios/save`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -71,23 +73,23 @@ export const saveScenarioTemporary = async (scenarioData: any): Promise<any> => 
 };
 
 /**
- * Loads scenario data from the backend (temporary persistence).
+ * Loads scenario data from the Java backend (temporary persistence).
  * @param scenarioId - The ID of the scenario to load.
  */
-export const loadScenarioTemporary = async (scenarioId: string): Promise<any> => {
+export const loadScenarioTemporary = async (scenarioId: string): Promise<ScenarioDto> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/scenarios/load/${scenarioId}`);
+        // Use Java backend URL and endpoint
+        const response = await fetch(`${JAVA_API_BASE_URL}/api/scenarios/load/${scenarioId}`);
         if (!response.ok) {
              // Consider more specific error handling based on status code (e.g., 404 Not Found)
             const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response' }));
             throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
         }
-        const data = await response.json();
-        // The backend placeholder currently returns { message: ..., id: ..., data: ... }
-        // Adjust this based on the actual data structure returned by the backend later
-        return data.data;
+        const data: ScenarioDto = await response.json();
+        // Java backend returns the ScenarioDto directly
+        return data;
     } catch (error) {
-        console.error(`Error loading scenario ${scenarioId}:`, error);
+        console.error(`Error loading scenario ${scenarioId} from Java backend:`, error);
         throw error; // Re-throw to allow calling component to handle it
     }
 };

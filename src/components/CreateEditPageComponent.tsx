@@ -21,8 +21,9 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useScenarioStore, Action } from '@/store/scenarioStore';
-// Removed import for checkBackendHealth as endpoint is not ready
+import { useScenarioStore, Action, ScenarioDto } from '@/store/scenarioStore'; // Import ScenarioDto
+// Import save and health check functions from API client
+import { saveScenarioTemporary, checkBackendHealth } from '@/services/apiClient';
 import { SortableStepItem } from '@/components/SortableStepItem';
 import Layout from '@/components/Layout'; // Import Layout
 
@@ -49,6 +50,11 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
   const fetchAndSetAvailableActions = useScenarioStore((state) => state.fetchAndSetAvailableActions); // Get the fetch action
   // Ensure we are using the correct update action name from the store
   const updateStepGridData = useScenarioStore((state) => state.updateStepGridData);
+  // Need setFlowSteps, setScenarioName, and setCurrentScenarioId
+  const setFlowSteps = useScenarioStore((state) => state.setFlowSteps);
+  const setScenarioName = useScenarioStore((state) => state.setScenarioName);
+  const setCurrentScenarioId = useScenarioStore((state) => state.setCurrentScenarioId);
+
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -62,7 +68,12 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
     // Load scenario data based on the prop passed from the page route
     loadScenario(scenarioId ?? null);
     // Fetch available actions when the component mounts
-    // Removed health check as the backend endpoint is not ready
+    // Check backend health
+    checkBackendHealth().then(isHealthy => {
+      console.log("Backend health status:", isHealthy ? "UP" : "DOWN");
+      // Optionally update UI based on health status
+    });
+    // Fetch available actions
     fetchAndSetAvailableActions().then(() => {
         console.log("Finished fetching actions.");
     }).catch((err: unknown) => { // Add type for err
@@ -169,6 +180,34 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
     //   });
   };
 
+  // --- Save Handler ---
+  const handleSave = async () => {
+    console.log("Attempting to save scenario...");
+    // Add loading state indication if needed
+    const scenarioToSave: ScenarioDto = {
+      scenarioId: currentScenarioId ?? undefined, // Include ID only if it exists (for updates)
+      scenarioName: scenarioName,
+      steps: flowSteps,
+    };
+
+    try {
+      const savedScenario = await saveScenarioTemporary(scenarioToSave);
+      console.log("Scenario saved successfully:", savedScenario);
+      // Update the store with the potentially new ID and confirmed data
+      // Use loadScenario to potentially refresh the state completely based on the saved data,
+      // ensuring consistency, especially if the backend modifies data on save.
+      // Or, update specific fields if preferred:
+      loadScenario(savedScenario.scenarioId ?? null); // Reload with the returned ID
+      // setScenarioName(savedScenario.scenarioName); // Update name if backend could change it
+      // setFlowSteps(savedScenario.steps); // Update steps if backend could change them
+      // Optionally show a success message to the user
+    } catch (error) {
+      console.error("Failed to save scenario:", error);
+      // Optionally show an error message to the user
+    } finally {
+      // Remove loading state indication if added
+    }
+  };
 
   return (
     <Layout>
@@ -187,7 +226,33 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
             Export to Excel
           </Button>
         </Box>
-        {/* Removed the misplaced closing </Typography> tag from here */}
+        {/* Add Scenario ID and Name inputs */}
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              fullWidth
+              label="Scenario ID"
+              value={currentScenarioId || ''}
+              onChange={(e) => setCurrentScenarioId(e.target.value || null)} // Update store on change
+              disabled={isEditMode} // Disable if editing existing
+              required // Mark as required
+              variant="outlined"
+              size="small"
+              helperText={isEditMode ? "Cannot change ID when editing" : "Required for new scenarios"}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+             <TextField
+               fullWidth
+               label="Scenario Name"
+               value={scenarioName}
+               onChange={(e) => setScenarioName(e.target.value)}
+               required
+               variant="outlined"
+               size="small"
+             />
+          </Grid>
+        </Grid>
 
         <Grid container spacing={3}>
           {/* Left Panel: Available Actions */}
@@ -279,7 +344,16 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
         </Grid>
         {/* TODO: Add Review/Save buttons (Phase 4) */}
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
-           {/* Placeholder for Save/Review buttons */}
+             {/* Save Button */}
+           <Button
+             variant="contained"
+             color="primary"
+             onClick={handleSave}
+             // Disable if no steps OR if creating new and no ID is provided
+             disabled={flowSteps.length === 0 || (!isEditMode && !currentScenarioId)}
+           >
+             {isEditMode ? 'Update Scenario (Temporary)' : 'Save New Scenario (Temporary)'}
+           </Button>
         </Box>
       </Container>
     </Layout>

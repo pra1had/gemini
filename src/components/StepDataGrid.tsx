@@ -127,6 +127,7 @@ const SingleGridComponent: React.FC<SingleGridComponentProps> = ({
               showQuickFilter: true, // Enable quick filter
             },
           }}
+        clipboardCopyCellDelimiter={"\t"} // Add delimiter for better spreadsheet paste
       />
     </Box>
   );
@@ -144,7 +145,8 @@ const generateGridColumns = (actionDetails: Action, gridType: GridType): GridCol
   const validationRule = (isMandatory: boolean | undefined) => ({
     preProcessEditCellProps: (params: any) => {
       const hasError = Boolean(isMandatory && !params.props.value);
-      return { ...params.props, error: hasError, helperText: hasError ? 'Required' : null };
+      // Only return the error prop, helperText is not standard for the cell's DOM element
+      return { ...params.props, error: hasError };
     },
   });
 

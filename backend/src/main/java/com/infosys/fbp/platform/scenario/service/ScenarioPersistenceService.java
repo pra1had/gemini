@@ -18,17 +18,24 @@ public class ScenarioPersistenceService {
     private final Map<String, ScenarioDto> scenarioStore = new ConcurrentHashMap<>();
 
     /**
-     * Saves a scenario to the in-memory store.
+     * Saves or updates a scenario in the in-memory store using the ID from the DTO.
      *
-     * @param scenarioDto The scenario data to save.
-     * @return The generated unique ID for the saved scenario.
+     * @param scenarioDto The scenario data to save, including the scenarioId.
+     * @return The saved ScenarioDto object.
      */
-    public String saveScenario(ScenarioDto scenarioDto) {
-        String scenarioId = UUID.randomUUID().toString();
+    public ScenarioDto saveScenario(ScenarioDto scenarioDto) {
+        // Use the ID provided in the DTO
+        String scenarioId = scenarioDto.getScenarioId();
+        if (scenarioId == null || scenarioId.trim().isEmpty()) {
+            // This should ideally be caught by the controller, but double-check
+            throw new IllegalArgumentException("Scenario ID cannot be null or empty for saving.");
+        }
+        // Store the DTO using the provided ID as the key
         scenarioStore.put(scenarioId, scenarioDto);
-        // Consider logging the save operation
-        // log.info("Scenario saved with ID: {}", scenarioId);
-        return scenarioId;
+        // Consider logging the save/update operation
+        // log.info("Scenario saved/updated with ID: {}", scenarioId);
+        // Return the saved DTO
+        return scenarioDto;
     }
 
     /**

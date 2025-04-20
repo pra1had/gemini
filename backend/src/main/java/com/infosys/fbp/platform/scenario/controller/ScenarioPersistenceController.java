@@ -26,28 +26,35 @@ public class ScenarioPersistenceController {
     }
 
     /**
-     * Saves a scenario temporarily.
+     * Saves or updates a scenario temporarily using the ID provided within the DTO.
      *
-     * @param scenarioDto The scenario data received in the request body.
-     * @return A response entity containing the generated scenario ID.
+     * @param scenarioDto The scenario data received in the request body, including the scenarioId.
+     * @return A response entity containing the saved ScenarioDto.
      */
     @PostMapping("/save")
-    public ResponseEntity<Map<String, String>> saveScenario(@RequestBody ScenarioDto scenarioDto) {
-        // Basic validation: Ensure scenarioDto is not null
+    public ResponseEntity<?> saveScenario(@RequestBody ScenarioDto scenarioDto) { // Return type changed
+        // Basic validation: Ensure scenarioDto and scenarioId are not null/empty
         if (scenarioDto == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "Scenario data cannot be null"));
         }
-        // Further validation could be added here (e.g., check if flowSteps is null/empty)
+        if (scenarioDto.getScenarioId() == null || scenarioDto.getScenarioId().trim().isEmpty()) {
+             return ResponseEntity.badRequest().body(Map.of("error", "Scenario ID cannot be null or empty"));
+        }
+        // Further validation could be added here (e.g., check name, steps)
 
         try {
-            String scenarioId = persistenceService.saveScenario(scenarioDto);
-            // Return the ID in a simple JSON object: {"id": "..."}
-            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("id", scenarioId));
+            // Pass the full DTO (including the user-provided ID) to the service
+            ScenarioDto savedScenario = persistenceService.saveScenario(scenarioDto);
+            // Return the full saved DTO
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedScenario);
+        } catch (IllegalArgumentException e) {
+             // Handle specific exceptions like potential ID conflicts if the service throws them
+             return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             // Log the exception details properly in a real application
-            // log.error("Error saving scenario: {}", e.getMessage(), e);
+            // log.error("Error saving scenario {}: {}", scenarioDto.getScenarioId(), e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                 .body(Map.of("error", "Failed to save scenario due to an internal error."));
+                                 .body(Map.of("error", "Failed to save scenario due to an internal error: " + e.getMessage()));
         }
     }
 

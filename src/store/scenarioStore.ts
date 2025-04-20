@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { fetchActionList } from '@/services/apiClient'; // Import the API client function
+// Import necessary functions and types from apiClient
+import { fetchActionList, loadScenarioTemporary } from '@/services/apiClient';
 
 // --- Interfaces ---
 
@@ -65,6 +66,13 @@ interface ScenarioState {
   expandedStepId: string | null; // Track which step is expanded
 }
 
+// Define the main Scenario DTO structure matching the backend
+export interface ScenarioDto {
+  scenarioId?: string; // Optional for new scenarios being saved
+  scenarioName: string;
+  steps: ScenarioStep[]; // Corresponds to flowSteps in the store state
+}
+
 interface ScenarioActions {
   setScenarioName: (name: string) => void;
   setAvailableActions: (actions: Action[]) => void; // Keep this setter
@@ -76,7 +84,8 @@ interface ScenarioActions {
   updateStepGridData: (stepId: string, gridType: GridType, newGridData: StepRowData[]) => void;
   reorderFlowSteps: (steps: ScenarioStep[]) => void;
   toggleStepExpansion: (stepId: string) => void;
-  loadScenario: (scenarioId: string | null) => void;
+  setCurrentScenarioId: (id: string | null) => void; // Action to set ID from input
+  loadScenario: (scenarioId: string | null) => Promise<void>; // Make return Promise<void> explicit
   resetStore: () => void;
 }
 
@@ -161,47 +170,43 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>((set, ge
     }));
   },
 
-  loadScenario: (scenarioId) => {
+  setCurrentScenarioId: (id) => set({ currentScenarioId: id }),
+
+  // Updated loadScenario to fetch from the backend
+  loadScenario: async (scenarioId) => {
     if (scenarioId) {
-      set({ isEditMode: true, currentScenarioId: scenarioId });
-      // TODO: Fetch existing scenario data later
-      // TODO: Fetch existing scenario data later, including stepData
-      // For now, use placeholder data with initialized stepData
-      // For now, use placeholder data with initialized stepData, using actionCode
-      // TODO: Fetch existing scenario data later, including separate grid data
-      // For now, use placeholder data with initialized separate grid data
-      set({
-        scenarioName: `Scenario ${scenarioId}`,
-        flowSteps: [
-          {
-            id: 'step-edit-1',
-            actionCode: 'placeholderActionCode1',
-            stepParamsData: [{ id: 1, param_code: 'A1' }],
-            stepRequestData: [],
-            stepResponseData: [{ id: 1, res_status: 'OK' }],
-          },
-          {
-            id: 'step-edit-2',
-            actionCode: 'placeholderActionCode2',
-            stepParamsData: [],
-            stepRequestData: [{ id: 1, req_body_field: 'value1' }],
-            stepResponseData: [],
-          },
-        ],
-      });
+      // Loading existing scenario
+      set({ isEditMode: true, currentScenarioId: scenarioId, scenarioName: 'Loading...', flowSteps: [] });
+      try {
+        const loadedScenario = await loadScenarioTemporary(scenarioId); // Call API client
+        // Ensure loaded steps have initialized grid data arrays if they are missing/null from backend
+        const sanitizedSteps = loadedScenario.steps.map((step: ScenarioStep) => ({ // Add type annotation for step
+          ...step,
+          stepParamsData: step.stepParamsData || [],
+          stepRequestData: step.stepRequestData || [],
+          stepResponseData: step.stepResponseData || [],
+        }));
+        set({
+          scenarioName: loadedScenario.scenarioName,
+          flowSteps: sanitizedSteps, // Use fetched and sanitized steps
+          // Keep isEditMode and currentScenarioId
+        });
+      } catch (error) {
+        console.error(`Failed to load scenario ${scenarioId}:`, error);
+        // Handle error state - maybe reset or show an error message
+        set({ scenarioName: `Error loading scenario ${scenarioId}`, flowSteps: [], currentScenarioId: null, isEditMode: false });
+      }
     } else {
-      get().resetStore();
-      set({ scenarioName: 'New Scenario' });
+      // Resetting for creating a new scenario
+      get().resetStore(); // Calls the updated resetStore below
+      set({ scenarioName: 'New Scenario', isEditMode: false }); // Explicitly set edit mode false
     }
   },
 
+  // Updated resetStore to clear currentScenarioId as well
   resetStore: () => {
     set({
-      scenarioName: '',
-      flowSteps: [],
-      isEditMode: false,
-      currentScenarioId: null,
-      expandedStepId: null,
+      ...initialState // Reset to initial state which includes currentScenarioId: null
     });
   },
 }));

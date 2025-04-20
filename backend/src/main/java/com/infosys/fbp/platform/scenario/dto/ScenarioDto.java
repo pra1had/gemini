@@ -17,13 +17,19 @@ import java.util.List;
 public class ScenarioDto {
 
     /**
+     * The unique identifier for the scenario. Provided by the user on creation.
+     */
+    private String scenarioId;
+
+    /**
      * The name of the scenario.
      */
     private String scenarioName;
 
     /**
      * The ordered list of steps in the scenario flow.
+     * Note: Field name changed from 'flowSteps' to 'steps' to match frontend store expectation.
      */
-    private List<ScenarioStepDto> flowSteps;
+    private List<ScenarioStepDto> steps;
 
 }

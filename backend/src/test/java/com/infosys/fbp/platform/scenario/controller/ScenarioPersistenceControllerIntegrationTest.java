@@ -16,8 +16,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -31,12 +30,14 @@ class ScenarioPersistenceControllerIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper; // For converting objects to/from JSON
+    private ObjectMapper objectMapper;
 
+    // Updated test: Expects full DTO in response, uses provided ID
     @Test
-    void saveScenario_shouldReturnCreatedStatusAndId() throws Exception {
+    void saveScenario_shouldReturnCreatedStatusAndDto() throws Exception {
         // Arrange
-        ScenarioDto scenario = createTestScenario("Integration Test Scenario");
+        String testId = "integ-test-id-1";
+        ScenarioDto scenario = createTestScenario(testId, "Integration Test Scenario");
         String scenarioJson = objectMapper.writeValueAsString(scenario);
 
         // Act & Assert
@@ -45,32 +46,32 @@ class ScenarioPersistenceControllerIntegrationTest {
                         .content(scenarioJson))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(notNullValue())));
+                .andExpect(jsonPath("$.scenarioId", is(testId))) // Check ID in response
+                .andExpect(jsonPath("$.scenarioName", is("Integration Test Scenario")))
+                .andExpect(jsonPath("$.steps", hasSize(1))) // Check steps array size
+                .andExpect(jsonPath("$.steps[0].actionCode", is("actionInteg"))); // Check some step data
     }
 
+    // Updated test: Uses known provided ID for loading
     @Test
     void loadScenario_shouldReturnScenario_whenIdExists() throws Exception {
-        // Arrange: First save a scenario to get a valid ID
-        ScenarioDto scenarioToSave = createTestScenario("Load Test Scenario");
+        // Arrange: Save a scenario with a known ID
+        String testId = "load-test-id-2";
+        ScenarioDto scenarioToSave = createTestScenario(testId, "Load Test Scenario");
         String saveRequestJson = objectMapper.writeValueAsString(scenarioToSave);
 
-        MvcResult saveResult = mockMvc.perform(post("/api/scenarios/save")
+        mockMvc.perform(post("/api/scenarios/save")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(saveRequestJson))
-                .andExpect(status().isCreated())
-                .andReturn();
+                .andExpect(status().isCreated()); // Ensure it was saved
 
-        // Extract the ID from the save response
-        String responseBody = saveResult.getResponse().getContentAsString();
-        Map<String, String> saveResponse = objectMapper.readValue(responseBody, new TypeReference<Map<String, String>>() {});
-        String scenarioId = saveResponse.get("id");
-
-        // Act & Assert: Load the scenario using the obtained ID
-        mockMvc.perform(get("/api/scenarios/load/{scenarioId}", scenarioId))
+        // Act & Assert: Load the scenario using the known ID
+        mockMvc.perform(get("/api/scenarios/load/{scenarioId}", testId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.scenarioId", is(testId)))
                 .andExpect(jsonPath("$.scenarioName", is("Load Test Scenario")))
-                .andExpect(jsonPath("$.flowSteps[0].actionCode", is("actionLoad"))); // Verify some data
+                .andExpect(jsonPath("$.steps[0].actionCode", is("actionInteg"))); // Verify some data (using updated field name 'steps')
     }
 
     @Test
@@ -81,24 +82,70 @@ class ScenarioPersistenceControllerIntegrationTest {
         // Act & Assert
         mockMvc.perform(get("/api/scenarios/load/{scenarioId}", nonExistentId))
                 .andExpect(status().isNotFound());
-    }
-
+    } // <-- Add missing closing brace here
+    // Updated test: Checks specifically for missing/empty scenarioId
     @Test
-    void saveScenario_shouldReturnBadRequest_whenBodyIsNull() throws Exception {
+    void saveScenario_shouldReturnBadRequest_whenIdIsNull() throws Exception {
+        // Arrange
+        // Create DTO without ID (or set to null explicitly if needed)
+        ScenarioDto scenario = new ScenarioDto(null, "Bad Request Scenario", List.of());
+        String scenarioJson = objectMapper.writeValueAsString(scenario);
+
         // Act & Assert
         mockMvc.perform(post("/api/scenarios/save")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}")) // Send an empty object, or potentially null if allowed by framework
-                .andExpect(status().isCreated()); // Assuming empty object is valid, adjust if needed
-                // If null body is truly invalid, expect badRequest()
-                // .andExpect(status().isBadRequest());
+                        .content(scenarioJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("Scenario ID cannot be null or empty")));
     }
 
-     // Helper method to create a simple test scenario DTO
-    private ScenarioDto createTestScenario(String name) {
-        ScenarioStepDataDto stepData1 = new ScenarioStepDataDto("rowA", Map.of("paramLoad", "valueLoad"));
-        ScenarioStepDataDto stepData2 = new ScenarioStepDataDto("rowB", Map.of("reqLoad", 456));
-        ScenarioStepDto step1 = new ScenarioStepDto("stepLoad1", "actionLoad", List.of(stepData1), List.of(stepData2), List.of());
-        return new ScenarioDto(name, List.of(step1));
+     @Test
+    void saveScenario_shouldReturnBadRequest_whenIdIsEmpty() throws Exception {
+        // Arrange
+        ScenarioDto scenario = createTestScenario("", "Empty ID Scenario"); // Use helper with empty ID
+        String scenarioJson = objectMapper.writeValueAsString(scenario);
+
+        // Act & Assert
+        mockMvc.perform(post("/api/scenarios/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(scenarioJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("Scenario ID cannot be null or empty")));
+    }
+
+     // Updated helper method to include scenarioId
+    private ScenarioDto createTestScenario(String id, String name) {
+        ScenarioStepDataDto stepData1 = new ScenarioStepDataDto("rowA", Map.of("paramInteg", "valueInteg"));
+        ScenarioStepDataDto stepData2 = new ScenarioStepDataDto("rowB", Map.of("reqInteg", 456));
+        ScenarioStepDto step1 = new ScenarioStepDto("stepInteg1", "actionInteg", List.of(stepData1), List.of(stepData2), List.of());
+        // Use updated DTO structure
+        return new ScenarioDto(id, name, List.of(step1));
+    }
+
+    @Test
+    void saveScenario_shouldOverwriteExistingScenario() throws Exception {
+        // Arrange
+        String testId = "overwrite-integ-id";
+        ScenarioDto scenario1 = createTestScenario(testId, "Original Integ Scenario");
+        ScenarioDto scenario2 = createTestScenario(testId, "Updated Integ Scenario"); // Same ID
+
+        // Save the first version
+        mockMvc.perform(post("/api/scenarios/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(scenario1)))
+                .andExpect(status().isCreated());
+
+        // Act: Save the second version with the same ID
+        mockMvc.perform(post("/api/scenarios/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(scenario2)))
+                .andExpect(status().isCreated()) // Should still be CREATED or OK if we define update semantics
+                .andExpect(jsonPath("$.scenarioId", is(testId)))
+                .andExpect(jsonPath("$.scenarioName", is("Updated Integ Scenario")));
+
+        // Assert: Load and verify the content is updated
+        mockMvc.perform(get("/api/scenarios/load/{scenarioId}", testId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.scenarioName", is("Updated Integ Scenario")));
     }
 }
