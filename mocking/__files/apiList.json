@@ -1,0 +1,15 @@
+{
+    "components": {
+        "Demo": {
+            "apiSchemas": {
+                "demo-customerGetOrder": "docs/demo-customerGetOrder.json",
+                "demo-customerPostOrder": "docs/demo-customerPostOrder.json"
+            }
+        },
+        "Collection": {
+            "apiSchemas": {
+                "create-demandCode": "docs/create-demandCode.json"
+            }
+        }
+    }
+}

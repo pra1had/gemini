@@ -47,3 +47,11 @@ py_backend/*.pyc
 py_backend/.env* # If backend uses its own .env
 # Add other Python-specific ignores if needed (e.g., instance folder for Flask)
 # backend/instance/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+
+backend/target/

@@ -1,13 +1,15 @@
 import { Action } from '@/store/scenarioStore'; // Assuming Action type is defined here
 
-const API_BASE_URL = 'http://localhost:5001'; // Backend server address
+const API_BASE_URL = 'http://localhost:5001'; // Python Backend server address
+const JAVA_API_BASE_URL = 'http://localhost:8080'; // Java Backend server address
 
 /**
- * Fetches the list of available actions from the backend.
+ * Fetches the list of available actions from the Java backend.
  */
 export const fetchActionList = async (): Promise<Action[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/actions`);
+    // Updated to use the Java backend endpoint
+    const response = await fetch(`${JAVA_API_BASE_URL}/api/action-codes`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

@@ -1,0 +1,9 @@
+{
+    "components": {
+        "Collection": {
+            "apiSchemas": {
+                "create-demandCode": "docs/create-demandCode.json"
+            }
+        }
+    }
+}

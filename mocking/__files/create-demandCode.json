@@ -1,0 +1,595 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "title": "merged spec",
+        "description": "merged spec",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8080"
+        }
+    ],
+    "paths": {
+        "/api/demandCodeCreation/{code}": {
+            "post": {
+                "tags": [
+                    "Demand Code"
+                ],
+                "description": "Create Demand Code",
+                "operationId": "create-demandCode",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "description": "Demand Code",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "examples": {
+                            "DC01": {
+                                "value": "DC01"
+                            }
+                        }
+                    },
+                    {
+                        "name": "targetSystemCode",
+                        "in": "query",
+                        "description": "Target System to be fetched",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "examples": {
+                            "FINACLE": {
+                                "value": "FINACLE"
+                            }
+                        }
+                    },
+                    {
+                        "name": "collectionMethodCode",
+                        "in": "query",
+                        "description": "Collection Method to be fetched",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "examples": {
+                            "CASH": {
+                                "value": "CASH"
+                            }
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApiSingleRequestDemandCode"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Demand Code Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiSingleResponseDemandCode"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseAbstractDTO"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "You are not authorized to view the resource"
+                    },
+                    "403": {
+                        "description": "Accessing the resource you were trying to reach is forbidden"
+                    },
+                    "404": {
+                        "description": "The resource you were trying to reach is not found",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseAbstractDTO"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiResponseAbstractDTO"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-fbp-params": {
+                    "isCreate": true
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ApiResponseAbstractDTO": {
+                "type": "object",
+                "properties": {
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AbstractDTO"
+                        }
+                    },
+                    "errorResponse": {
+                        "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                }
+            },
+            "AbstractDTO": {
+                "type": "object"
+            },
+            "ApiSingleRequestDemandCode": {
+                "required": [
+                    "request"
+                ],
+                "type": "object",
+                "properties": {
+                    "request": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DemandCode"
+                        }
+                    }
+                }
+            },
+            "ErrorResponse": {
+                "required": [
+                    "code",
+                    "correlationId",
+                    "message",
+                    "path",
+                    "status",
+                    "timestamp"
+                ],
+                "type": "object",
+                "properties": {
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "message": {
+                        "type": "string"
+                    },
+                    "correlationId": {
+                        "type": "string"
+                    },
+                    "path": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "integer",
+                        "format": "int32"
+                    }
+                }
+            },
+            "ApiSingleResponseDemandCode": {
+                "type": "object",
+                "properties": {
+                    "results": {
+                        "type": "array",
+                        "description": "",
+                        "items": {
+                            "$ref": "#/components/schemas/DemandCode"
+                        }
+                    },
+                    "errorResponse": {
+                        "$ref": "#/components/schemas/ErrorResponse"
+                    }
+                },
+                "description": ""
+            },
+            "DemandCode": {
+                "required": [
+                    "demandCode",
+                    "mappings",
+                    "props"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Generated UUID",
+                        "readOnly": true,
+                        "example": "1234567890",
+                        "x-fbp-props": {
+                            "businessName": "Id"
+                        }
+                    },
+                    "demandCode": {
+                        "maxLength": 20,
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "Demand Code",
+                        "readOnly": false,
+                        "example": "DC01",
+                        "x-fbp-props": {
+                            "businessName": "Demand Code"
+                        }
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Demand Code Description",
+                        "readOnly": false,
+                        "example": "Demand Code 01",
+                        "x-fbp-props": {
+                            "businessName": "Description"
+                        }
+                    },
+                    "demandCodeGroup": {
+                        "type": "string",
+                        "description": "Demand Code Group",
+                        "readOnly": false,
+                        "example": "PRINCIPLE",
+                        "x-fbp-props": {
+                            "businessName": "Demand Code Group"
+                        }
+                    },
+                    "deleted": {
+                        "type": "string",
+                        "description": "Logical deleted",
+                        "readOnly": true,
+                        "enum": [
+                            "Y",
+                            "N"
+                        ],
+                        "x-fbp-props": {
+                            "businessName": "Deleted"
+                        }
+                    },
+                    "props": {
+                        "type": "array",
+                        "description": "Properties of the demand code",
+                        "items": {
+                            "$ref": "#/components/schemas/DemandCodeProperty"
+                        },
+                        "x-fbp-props": {
+                            "businessName": "Properties"
+                        }
+                    },
+                    "mappings": {
+                        "type": "array",
+                        "description": "Mappings of the demand code to collectable event code",
+                        "items": {
+                            "$ref": "#/components/schemas/DemandCodeMapping"
+                        },
+                        "x-fbp-props": {
+                            "businessName": "Mappings"
+                        }
+                    }
+                },
+                "description": "Manages the demand code within collection boundary",
+                "x-fbp-params": {
+                    "rootSchema": true,
+                    "repoMethods": [
+                        {
+                            "query": "from DemandCode tbl WHERE coalesce(tbl.code, 'x') = coalesce(:code, tbl.code, 'x') and tbl.orgCode = :orgCode",
+                            "fetchMethod": "fetchForDemandCode",
+                            "fetchParams": "String code, String orgCode"
+                        }
+                    ],
+                    "overrideMethods": [],
+                    "interfaces": [],
+                    "lookups": [
+                        {
+                            "name": "Id",
+                            "context": "DemandCode"
+                        }
+                    ],
+                    "endPoints": [
+                        {
+                            "name": "demandCodeCreation",
+                            "isCreate": true,
+                            "isUpdate": false,
+                            "isFetch": false,
+                            "singleRequest": true,
+                            "singleResponse": true,
+                            "pathParameters": [
+                                {
+                                    "name": "code",
+                                    "description": "Demand Code",
+                                    "type": "string",
+                                    "example": "DC01"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "demandCodeModification",
+                            "isCreate": false,
+                            "isUpdate": true,
+                            "isFetch": false,
+                            "singleRequest": true,
+                            "singleResponse": true,
+                            "pathParameters": [
+                                {
+                                    "name": "code",
+                                    "description": "Demand Code",
+                                    "type": "string",
+                                    "example": "DC01",
+                                    "path": true,
+                                    "requiredParam": true
+                                }
+                            ]
+                        },
+                        {
+                            "name": "demandCode",
+                            "isCreate": false,
+                            "isUpdate": false,
+                            "isFetch": true,
+                            "singleResponse": false,
+                            "repoMethod": "fetchForDemandCode",
+                            "queryParameters": [
+                                {
+                                    "name": "code",
+                                    "description": "Demand Code",
+                                    "type": "string",
+                                    "example": "DC01",
+                                    "path": false,
+                                    "requiredParam": false
+                                }
+                            ]
+                        }
+                    ],
+                    "behaviours": {
+                        "persist": true,
+                        "setDefaults": true
+                    },
+                    "isModifiable": true,
+                    "nonModifiableAttributes": [
+                        "id",
+                        "overrideScopeCriteria"
+                    ],
+                    "auditBusinessEvent": "DEMAND_CODE"
+                }
+            },
+            "DemandCodeProperty": {
+                "required": [
+                    "demandAggregationPeriod",
+                    "demandCode",
+                    "effectiveFrom"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Generated UUID",
+                        "readOnly": true
+                    },
+                    "demandCode": {
+                        "maxLength": 20,
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "Demand Code",
+                        "readOnly": false,
+                        "example": "DC01"
+                    },
+                    "demandAggregationPeriod": {
+                        "type": "string",
+                        "description": "Demand Aggregation Period",
+                        "readOnly": false,
+                        "enum": [
+                            "DAILY",
+                            "WEEKLY",
+                            "MONTHLY",
+                            "DUE_DATE"
+                        ],
+                        "x-fbp-enum-name": "DemandAggregationPeriod"
+                    },
+                    "demandAggregationAttributes": {
+                        "type": "array",
+                        "description": "Demand Aggregation Attributes",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "drillDownAggregationPeriod": {
+                        "type": "string",
+                        "description": "Drill Down Aggregation Period",
+                        "readOnly": false,
+                        "enum": [
+                            "DAILY",
+                            "WEEKLY",
+                            "MONTHLY",
+                            "DUE_DATE"
+                        ],
+                        "x-fbp-enum-name": "DrillDownAggregationPeriod"
+                    },
+                    "drillDownAggregationAttributes": {
+                        "type": "array",
+                        "description": "Drill Down Aggregation Attributes",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "effectiveFrom": {
+                        "$ref": "#/components/schemas/BusinessDateDTO"
+                    },
+                    "effectiveTill": {
+                        "$ref": "#/components/schemas/NullableBusinessDateDTO"
+                    },
+                    "deleted": {
+                        "type": "string",
+                        "description": "Logical deleted",
+                        "readOnly": true,
+                        "enum": [
+                            "Y",
+                            "N"
+                        ]
+                    }
+                },
+                "description": "Manages the properties of demand code",
+                "x-fbp-params": {
+                    "repoMethods": [
+                        {
+                            "query": "from DemandCodeProperty dcp WHERE coalesce(dcp.demandAggregationPeriod, 'x') = coalesce(:demandAggregationPeriod, dcp.demandAggregationPeriod, 'x') and coalesce(dcp.drillDownAggregationPeriod, 'x') = coalesce(:drillDownAggregationPeriod, dcp.drillDownAggregationPeriod, 'x') and coalesce(dcp.deleted, 'x') = coalesce(:includeDeletedRecords, dcp.deleted, 'x') and dcp.orgCode = :orgCode",
+                            "fetchMethod": "fetchForDemandCodeProperty",
+                            "fetchParams": "String demandAggregationPeriod, String drillDownAggregationPeriod, String includeDeletedRecords, String orgCode"
+                        }
+                    ],
+                    "overrideMethods": [
+                        {
+                            "type": "String",
+                            "function": "getNaturalKey",
+                            "params": "",
+                            "body": "return demandCode;"
+                        }
+                    ],
+                    "interfaces": [
+                        {
+                            "iface": "ITemporalEntity",
+                            "package": "com.infosys.fbp.framework.util.interfaces"
+                        }
+                    ],
+                    "endPoints": [],
+                    "lookups": [
+                        {
+                            "name": "Id",
+                            "context": "DemandCodeProperty"
+                        }
+                    ],
+                    "behaviours": {
+                        "persist": true,
+                        "setDefaults": true
+                    },
+                    "isModifiable": true,
+                    "nonModifiableAttributes": [
+                        "id",
+                        "overrideScopeCriteria"
+                    ]
+                }
+            },
+            "DemandCodeMapping": {
+                "required": [
+                    "collectableEventCode",
+                    "demandCode",
+                    "effectiveFrom",
+                    "host"
+                ],
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Generated UUID",
+                        "readOnly": true
+                    },
+                    "demandCode": {
+                        "maxLength": 20,
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "Demand Code",
+                        "readOnly": false,
+                        "example": "DC01"
+                    },
+                    "collectableEventCode": {
+                        "maxLength": 20,
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "Collectable Event Code"
+                    },
+                    "host": {
+                        "minLength": 1,
+                        "type": "string",
+                        "description": "Source of collectable event code"
+                    },
+                    "effectiveFrom": {
+                        "$ref": "#/components/schemas/BusinessDateDTO"
+                    },
+                    "effectiveTill": {
+                        "$ref": "#/components/schemas/NullableBusinessDateDTO"
+                    },
+                    "deleted": {
+                        "type": "string",
+                        "description": "Logical deleted",
+                        "readOnly": true,
+                        "enum": [
+                            "Y",
+                            "N"
+                        ]
+                    }
+                },
+                "description": "Manages the mapping of demand code to collectable event code",
+                "x-fbp-params": {
+                    "repoMethods": [
+                        {
+                            "query": "from DemandCodeMapping dcm WHERE coalesce(dcm.collectableEventCode, 'x') = coalesce(:collectableEventCode, dcm.collectableEventCode, 'x') and coalesce(dcm.host, 'x') = coalesce(:host, dcm.host, 'x') and coalesce(dcm.deleted, 'x') = coalesce(:includeDeletedRecords, dcm.deleted, 'x') and dcm.orgCode = :orgCode",
+                            "fetchMethod": "fetchForDemandCodeMapping",
+                            "fetchParams": "String collectableEventCode, String host, String includeDeletedRecords, String orgCode"
+                        }
+                    ],
+                    "overrideMethods": [
+                        {
+                            "type": "String",
+                            "function": "getNaturalKey",
+                            "params": "",
+                            "body": "return demandCode;"
+                        }
+                    ],
+                    "interfaces": [
+                        {
+                            "iface": "ITemporalEntity",
+                            "package": "com.infosys.fbp.framework.util.interfaces"
+                        }
+                    ],
+                    "endPoints": [],
+                    "lookups": [
+                        {
+                            "name": "Id",
+                            "context": "DemandCodeMapping"
+                        }
+                    ],
+                    "behaviours": {
+                        "persist": true,
+                        "setDefaults": true
+                    },
+                    "isModifiable": true,
+                    "nonModifiableAttributes": [
+                        "id",
+                        "overrideScopeCriteria"
+                    ]
+                }
+            },
+            "BusinessDateDTO": {
+                "type": "string",
+                "description": "Business Date",
+                "format": "date",
+                "example": "2020-10-25"
+            },
+            "NullableBusinessDateDTO": {
+                "type": "string",
+                "description": "Business Date",
+                "format": "date",
+                "nullable": true,
+                "example": "2020-10-25"
+            }
+        }
+    }
+}

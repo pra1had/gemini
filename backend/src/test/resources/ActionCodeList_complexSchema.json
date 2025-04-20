@@ -1,0 +1,62 @@
+[
+  {
+    "componentName": "ComplexComponent",
+    "actionCodeGroupName": "Complex Operations",
+    "actionCode": "processComplexData",
+    "endPoint": "/complex",
+    "type": "PostAndVerify",
+    "pathPropertyListMap": {
+      "pathParamList": [],
+      "queryParamList": []
+    },
+    "requestBodyColumnList": [
+      {
+        "technicalColumnName": "requestId",
+        "isMandatory": true,
+        "derivedDataType": ":request"
+      },
+      {
+        "technicalColumnName": "description",
+        "isMandatory": true,
+        "derivedDataType": ":request:details"
+      },
+      {
+        "technicalColumnName": "isActive",
+        "isMandatory": false,
+        "derivedDataType": ":request:details"
+      },
+      {
+        "technicalColumnName": "itemId",
+        "isMandatory": true,
+        "derivedDataType": ":request:items"
+      },
+      {
+        "technicalColumnName": "setting",
+        "isMandatory": false,
+        "derivedDataType": ":request:items:config"
+      }
+    ],
+    "responseBodyColumnList": [
+      {
+        "technicalColumnName": "status",
+        "isMandatory": false,
+        "derivedDataType": ":response"
+      },
+      {
+        "technicalColumnName": "value",
+        "isMandatory": false,
+        "derivedDataType": ":response:resultData"
+      },
+      {
+        "technicalColumnName": "originalItemId",
+        "isMandatory": false,
+        "derivedDataType": ":response:processedItems"
+      },
+      {
+        "technicalColumnName": "outcome",
+        "isMandatory": false,
+        "derivedDataType": ":response:processedItems"
+      }
+    ]
+  }
+]

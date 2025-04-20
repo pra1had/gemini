@@ -1,0 +1,9 @@
+{
+  "components": {
+    "ComplexComponent": {
+      "apiSchemas": {
+        "processComplexData": "docs/complex-schema.json"
+      }
+    }
+  }
+}

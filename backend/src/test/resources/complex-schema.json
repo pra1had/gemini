@@ -1,0 +1,113 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Complex Schema API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/complex": {
+      "post": {
+        "summary": "Process complex data",
+        "tags": ["Complex Operations"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["requestId", "details", "items"],
+                "properties": {
+                  "requestId": {
+                    "type": "string",
+                    "description": "Unique request identifier"
+                  },
+                  "details": {
+                    "type": "object",
+                    "required": ["description"],
+                    "properties": {
+                      "description": {
+                        "type": "string"
+                      },
+                      "isActive": {
+                        "type": "boolean",
+                        "default": true
+                      }
+                    }
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["itemId"],
+                      "properties": {
+                        "itemId": {
+                          "type": "integer"
+                        },
+                        "config": {
+                          "type": "object",
+                          "properties": {
+                            "setting": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful processing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "resultData": {
+                      "type": "object",
+                      "properties": {
+                        "value": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "processedItems": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "originalItemId": {
+                            "type": "integer"
+                          },
+                          "outcome": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    }
+  }
+}
