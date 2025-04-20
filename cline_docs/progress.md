@@ -1,8 +1,10 @@
 # Progress
 
-## What Works
+## Backend Service (`backend/`)
 
-*   **Project Structure:** The basic Java/Spring Boot project structure within `scenario-builder/` is set up.
+### What Works
+
+*   **Project Structure:** The basic Java/Spring Boot project structure within `backend/` is set up.
 *   **Core Components (File Presence):**
     *   `ActionCodeController.java` exists.
     *   `ActionCodeService.java` exists.
@@ -16,7 +18,7 @@
     *   `ActionCodeInfo` DTO includes lists for both flattened request and response columns.
 *   **Core Service Tests Passing:** The unit tests in `ActionCodeServiceTest.java` (using `MockRestServiceServer` for HTTP mocking) are passing, verifying the core logic for manifest/schema fetching, parsing, path validation, and request/response body flattening against the defined test cases.
 
-## What's Left to Build / Verify
+### What's Left to Build / Verify (Backend)
 
 1.  **Implement HTTP Client Configuration:**
     *   Add properties to `application.properties` for the *actual* manifest URL and potentially base URLs for schemas (currently uses test URLs).
@@ -28,14 +30,71 @@
 3.  **Verify Controller Logic (`ActionCodeController`):**
     *   Confirm the `@GetMapping("/action-codes")` endpoint is correctly defined and functional.
     *   Ensure it calls the `ActionCodeService` and returns the results appropriately serialized as JSON.
-4.  **Verify DTOs:** Ensure the DTO structures accurately reflect the target JSON output format specified in the *final* expected output definition (e.g., compare with `docs/ActionCodeList.json` if that's the definitive source).
+4.  **Verify DTOs:** Ensure the DTO structures accurately reflect the target JSON output format specified in the *final* expected output definition (e.g., compare with `docs/resources/ActionCodeList.json` if that's the definitive source).
 5.  **Testing:**
     *   **Expand `ActionCodeServiceTest.java`:** Add more test cases covering diverse schema structures (e.g., deeper nesting, different array types, more complex refs), network edge cases (timeouts, different HTTP errors), and parsing edge cases.
     *   **Implement Integration Tests:** Create integration tests for the `/action-codes` endpoint to verify the full flow from HTTP request to response, potentially using `MockRestServiceServer` or WireMock for external dependencies.
 6.  **Error Handling:** Ensure robust error handling is implemented and tested for HTTP client errors (timeouts, connection issues, 4xx/5xx responses) and parsing errors throughout the service and controller layers.
 
-## Progress Status
+### Progress Status (Backend)
 
 *   **Core Functionality Implemented & Tested:** The basic code structure is present. The core logic in `ActionCodeService` (manifest/schema fetching & parsing, path validation, request/response body flattening) is implemented and verified by passing unit tests (`ActionCodeServiceTest.java` using `MockRestServiceServer`).
-*   **Verification Needed:** HTTP client configuration (`RestTemplate` bean in `RestClientConfig.java`), controller logic (`ActionCodeController`), DTO alignment with the final expected output (`docs/ActionCodeList.json`), and end-to-end integration still require verification and potentially implementation/refinement.
+*   **Verification Needed:** HTTP client configuration (`RestTemplate` bean in `RestClientConfig.java`), controller logic (`ActionCodeController`), DTO alignment with the final expected output (`docs/resources/ActionCodeList.json`), and end-to-end integration still require verification and potentially implementation/refinement.
 *   **Testing Needs Expansion:** While core service tests pass, they need expansion to cover more complex scenarios and edge cases. Integration tests for the controller endpoint are still needed.
+
+---
+
+## Frontend Application (`src/`) - Scenario Workbench UI
+
+### What Works (Based on `docs/plan.md` Phase 1 & File Structure)
+
+*   **Project Setup:** Next.js (App Router), Material UI, Zustand, ESLint configured. Basic `src/` structure exists.
+*   **Frontend Foundation:**
+    *   Client-side routing via App Router (`/`, `/create`, `/edit/[scenarioId]`).
+    *   Zustand store (`scenarioStore.ts`) set up for state management (using mock data initially).
+    *   Main application layout component (`Layout.tsx`) created.
+*   **Scenario Building UI (Core Flow - US-001, US-003, US-004):**
+    *   "Create Scenario" placeholder route (`/create`) exists.
+    *   Main Create/Edit page component (`CreateEditPageComponent.tsx`) exists, acting as the "Your Flow" panel container.
+    *   Adding Actions (from mock list in store) to the flow implemented (via click).
+    *   Reordering steps using `dnd-kit` implemented (`SortableStepItem.tsx`).
+    *   Removing steps implemented (delete button).
+    *   Inline expansion/collapse for steps implemented.
+*   **Step Data Entry UI (Basic Grid - Part of US-005):**
+    *   Basic grid component placeholder (`StepDataGrid.tsx`) exists.
+    *   Static rendering based on mock Action type (placeholder).
+    *   Basic data display from mock state (placeholder).
+*   **Mock Data:** Mock Action List and Scenario structure defined in Zustand store (`scenarioStore.ts`).
+
+### What's Left to Build / Verify (Frontend - Primarily Phase 2 onwards)
+
+1.  **Backend Integration (Phase 2):**
+    *   Connect `apiClient.ts` to *actual* backend endpoints (`/health`, `/api/actions`, save/load/export).
+    *   Fetch and display the *real* Action List from `/api/actions` (US-002).
+    *   Connect UI state to backend persistence (initially temporary, then Git via backend).
+2.  **Step Data Entry UI (Grid Enhancement - Phase 2 - US-005 Revised):**
+    *   Implement dynamic grid rendering based on *real* Action types.
+    *   Implement full data binding to Zustand state.
+    *   Implement keyboard navigation, copy/paste, add/remove rows.
+    *   Implement inline validation feedback.
+    *   Implement data input/update logic (implicit save to state).
+3.  **Markdown/Excel Features (Phase 3):**
+    *   Implement "Export" button and connect to backend endpoint (US-011).
+    *   Verify save/load uses Markdown format via backend.
+4.  **Git Integration & Final Features (Phase 4):**
+    *   Implement final Search page UI and connect to backend search endpoint (US-008).
+    *   Connect "Edit" button on Search page to load scenario (US-009).
+    *   Implement "Duplicate" scenario flow (US-010).
+    *   Implement final "Create Scenario" metadata UI (US-001).
+    *   Implement "Review" view/navigation (US-006).
+    *   Implement final "Save" button on Review view, connect to backend save endpoint, handle success/error (US-007).
+    *   Implement role-based UI restrictions (US-012).
+    *   Implement first-time user experience/tooltips (PRD 5.1).
+5.  **Testing:** Implement comprehensive unit, integration, and E2E tests.
+
+### Progress Status (Frontend)
+
+*   **Phase 1 Largely Complete:** The core UI foundation, layout, routing, state management (with mocks), and basic scenario flow interactions (add, remove, reorder, expand/collapse steps) are implemented.
+*   **Basic Grid Placeholder:** A placeholder for the data entry grid exists but requires significant enhancement (Phase 2).
+*   **Backend Connection Pending:** The frontend currently uses mock data and needs to be connected to the backend API endpoints (Phase 2).
+*   **Advanced Features Pending:** Markdown/Excel generation, Git integration, final search/save/load/duplicate flows, and role-based access are planned for later phases.
