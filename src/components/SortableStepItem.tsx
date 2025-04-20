@@ -5,17 +5,20 @@ import { CSS } from '@dnd-kit/utilities';
 import { Paper, Grid, Typography, IconButton } from '@mui/material';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { ScenarioStep, Action, StepRowData } from '@/store/scenarioStore'; // Use @ alias, import StepRowData
-import StepDataGrid from './StepDataGrid'; // Import the new grid component
+// Import GridType and update store imports
+import { ScenarioStep, Action, StepRowData, GridType } from '@/store/scenarioStore';
+// Import the container component instead of the old grid
+import StepDataGridContainer from './StepDataGrid';
 
 interface SortableStepItemProps {
-  step: ScenarioStep;
+  step: ScenarioStep; // Step object now contains stepParamsData, stepRequestData, stepResponseData
   index: number;
   availableActions: Action[];
   onRemove: (stepId: string) => void;
   expandedStepId: string | null;
   onToggleExpansion: (stepId: string) => void;
-  onUpdateData: (stepId: string, newStepData: StepRowData[]) => void; // Add the prop for updating data
+  // Update prop name to match the new store action
+  onUpdateGridData: (stepId: string, gridType: GridType, newGridData: StepRowData[]) => void;
 }
 
 export const SortableStepItem: React.FC<SortableStepItemProps> = ({
@@ -25,7 +28,7 @@ export const SortableStepItem: React.FC<SortableStepItemProps> = ({
   onRemove,
   expandedStepId,
   onToggleExpansion,
-  onUpdateData, // Destructure the new prop
+  onUpdateGridData, // Destructure the updated prop
 }) => {
   const isExpanded = expandedStepId === step.id;
 
@@ -79,19 +82,14 @@ export const SortableStepItem: React.FC<SortableStepItemProps> = ({
       </Grid>
       {isExpanded && (
         <Paper elevation={0} sx={{ p: 2, mt: 1, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
-          <Typography variant="subtitle2" gutterBottom>
-              {/* Display actionCode */}
-              Data for: {actionDetails?.actionCode}
-            </Typography>
-            {/* Pass step data and update handler to the grid */}
-            <StepDataGrid
-              actionDetails={actionDetails}
-              stepId={step.id} // Pass stepId for the update handler
-              stepData={step.stepData}
-              onUpdateData={onUpdateData}
-            />
-          </Paper>
-        )}
+          {/* Render the container component */}
+          <StepDataGridContainer
+            step={step} // Pass the whole step object
+            actionDetails={actionDetails}
+            onUpdateGridData={onUpdateGridData} // Pass the updated store action handler
+          />
+        </Paper>
+      )}
     </Paper>
   );
 };

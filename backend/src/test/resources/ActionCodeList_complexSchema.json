@@ -13,49 +13,67 @@
       {
         "technicalColumnName": "requestId",
         "isMandatory": true,
-        "derivedDataType": ":request"
+        "derivedDataType": ":request",
+        "attributePath": ":request:requestId",
+        "attributeGridPath": ":request:requestId"
       },
       {
         "technicalColumnName": "description",
         "isMandatory": true,
-        "derivedDataType": ":request:details"
+        "derivedDataType": ":request:details",
+        "attributePath": ":request:details:description",
+        "attributeGridPath": ":request:details:description"
       },
       {
         "technicalColumnName": "isActive",
         "isMandatory": false,
-        "derivedDataType": ":request:details"
+        "derivedDataType": ":request:details",
+        "attributePath": ":request:details:isActive",
+        "attributeGridPath": ":request:details:isActive"
       },
       {
         "technicalColumnName": "itemId",
         "isMandatory": true,
-        "derivedDataType": ":request:items"
+        "derivedDataType": ":request:items",
+        "attributePath": ":request:items:itemId",
+        "attributeGridPath": ":request:items:itemId"
       },
       {
         "technicalColumnName": "setting",
         "isMandatory": false,
-        "derivedDataType": ":request:items:config"
+        "derivedDataType": ":request:items:config",
+        "attributePath": ":request:items:config:setting",
+        "attributeGridPath": ":request:items:config:setting"
       }
     ],
     "responseBodyColumnList": [
       {
         "technicalColumnName": "status",
         "isMandatory": false,
-        "derivedDataType": ":response"
+        "derivedDataType": ":response",
+        "attributePath": ":response:status",
+        "attributeGridPath": ":response:status"
       },
       {
         "technicalColumnName": "value",
         "isMandatory": false,
-        "derivedDataType": ":response:resultData"
+        "derivedDataType": ":response:resultData",
+        "attributePath": ":response:resultData:value",
+        "attributeGridPath": ":response:resultData:value"
       },
       {
         "technicalColumnName": "originalItemId",
         "isMandatory": false,
-        "derivedDataType": ":response:processedItems"
+        "derivedDataType": ":response:processedItems",
+        "attributePath": ":response:processedItems:originalItemId",
+        "attributeGridPath": ":response:processedItems:originalItemId"
       },
       {
         "technicalColumnName": "outcome",
         "isMandatory": false,
-        "derivedDataType": ":response:processedItems"
+        "derivedDataType": ":response:processedItems",
+        "attributePath": ":response:processedItems:outcome",
+        "attributeGridPath": ":response:processedItems:outcome"
       }
     ]
   }

@@ -46,7 +46,8 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
   const reorderFlowSteps = useScenarioStore((state) => state.reorderFlowSteps);
   const toggleStepExpansion = useScenarioStore((state) => state.toggleStepExpansion);
   const fetchAndSetAvailableActions = useScenarioStore((state) => state.fetchAndSetAvailableActions); // Get the fetch action
-  const updateStepData = useScenarioStore((state) => state.updateStepData); // Get the update action
+  // Ensure we are using the correct update action name from the store
+  const updateStepGridData = useScenarioStore((state) => state.updateStepGridData);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -56,11 +57,18 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
   );
 
   useEffect(() => {
+    console.log("CreateEditPageComponent mounted/scenarioId changed. Fetching actions...");
     // Load scenario data based on the prop passed from the page route
     loadScenario(scenarioId ?? null);
-    // Fetch available actions when the component mounts or scenarioId changes
-    fetchAndSetAvailableActions();
-  }, [scenarioId, loadScenario, fetchAndSetAvailableActions]); // Add fetch action to dependencies
+    // Fetch available actions when the component mounts
+    fetchAndSetAvailableActions().then(() => {
+        console.log("Finished fetching actions.");
+    }).catch(err => {
+        console.error("Error during action fetch in useEffect:", err);
+    });
+    // Dependencies: scenarioId ensures reload if navigating between edit pages,
+    // loadScenario and fetchAndSetAvailableActions are stable references from Zustand.
+  }, [scenarioId, loadScenario, fetchAndSetAvailableActions]);
 
   const handleAddAction = (action: Action) => {
     addFlowStep(action);
@@ -257,7 +265,7 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
                          onRemove={removeFlowStep}
                          expandedStepId={expandedStepId}
                          onToggleExpansion={toggleStepExpansion}
-                         onUpdateData={updateStepData} // Pass the update function
+                         onUpdateGridData={updateStepGridData} // Pass the correct update function
                        />
                      ))}
                    </SortableContext>

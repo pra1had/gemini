@@ -30,224 +30,312 @@
       {
         "technicalColumnName": "id",
         "isMandatory": false,
-        "derivedDataType": ":request"
+        "derivedDataType": ":request",
+        "attributePath": ":request:id",
+        "attributeGridPath": ":request:id"
       },
       {
         "technicalColumnName": "demandCode",
         "isMandatory": true,
-        "derivedDataType": ":request"
+        "derivedDataType": ":request",
+        "attributePath": ":request:demandCode",
+        "attributeGridPath": ":request:demandCode"
       },
       {
         "technicalColumnName": "description",
         "isMandatory": false,
-        "derivedDataType": ":request"
+        "derivedDataType": ":request",
+        "attributePath": ":request:description",
+        "attributeGridPath": ":request:description"
       },
       {
         "technicalColumnName": "demandCodeGroup",
         "isMandatory": false,
-        "derivedDataType": ":request"
+        "derivedDataType": ":request",
+        "attributePath": ":request:demandCodeGroup",
+        "attributeGridPath": ":request:demandCodeGroup"
       },
       {
         "technicalColumnName": "deleted",
         "isMandatory": false,
-        "derivedDataType": ":request"
+        "derivedDataType": ":request",
+        "attributePath": ":request:deleted",
+        "attributeGridPath": ":request:deleted"
       },
       {
         "technicalColumnName": "id",
         "isMandatory": false,
-        "derivedDataType": ":request:props"
+        "derivedDataType": ":request:props",
+        "attributePath": ":request:props:id",
+        "attributeGridPath": ":request:props:id"
       },
       {
         "technicalColumnName": "demandCode",
         "isMandatory": true,
-        "derivedDataType": ":request:props"
+        "derivedDataType": ":request:props",
+        "attributePath": ":request:props:demandCode",
+        "attributeGridPath": ":request:props:demandCode"
       },
       {
         "technicalColumnName": "demandAggregationPeriod",
         "isMandatory": true,
-        "derivedDataType": ":request:props"
+        "derivedDataType": ":request:props",
+        "attributePath": ":request:props:demandAggregationPeriod",
+        "attributeGridPath": ":request:props:demandAggregationPeriod"
       },
       {
         "technicalColumnName": "drillDownAggregationPeriod",
         "isMandatory": false,
-        "derivedDataType": ":request:props"
+        "derivedDataType": ":request:props",
+        "attributePath": ":request:props:drillDownAggregationPeriod",
+        "attributeGridPath": ":request:props:drillDownAggregationPeriod"
       },
       {
         "technicalColumnName": "effectiveFrom",
         "isMandatory": true,
-        "derivedDataType": ":request:props"
+        "derivedDataType": ":request:props",
+        "attributePath": ":request:props:effectiveFrom",
+        "attributeGridPath": ":request:props:effectiveFrom"
       },
       {
         "technicalColumnName": "effectiveTill",
         "isMandatory": false,
-        "derivedDataType": ":request:props"
+        "derivedDataType": ":request:props",
+        "attributePath": ":request:props:effectiveTill",
+        "attributeGridPath": ":request:props:effectiveTill"
       },
       {
         "technicalColumnName": "deleted",
         "isMandatory": false,
-        "derivedDataType": ":request:props"
+        "derivedDataType": ":request:props",
+        "attributePath": ":request:props:deleted",
+        "attributeGridPath": ":request:props:deleted"
       },
       {
         "technicalColumnName": "id",
         "isMandatory": false,
-        "derivedDataType": ":request:mappings"
+        "derivedDataType": ":request:mappings",
+        "attributePath": ":request:mappings:id",
+        "attributeGridPath": ":request:mappings:id"
       },
       {
         "technicalColumnName": "demandCode",
         "isMandatory": true,
-        "derivedDataType": ":request:mappings"
+        "derivedDataType": ":request:mappings",
+        "attributePath": ":request:mappings:demandCode",
+        "attributeGridPath": ":request:mappings:demandCode"
       },
       {
         "technicalColumnName": "collectableEventCode",
         "isMandatory": true,
-        "derivedDataType": ":request:mappings"
+        "derivedDataType": ":request:mappings",
+        "attributePath": ":request:mappings:collectableEventCode",
+        "attributeGridPath": ":request:mappings:collectableEventCode"
       },
       {
         "technicalColumnName": "host",
         "isMandatory": true,
-        "derivedDataType": ":request:mappings"
+        "derivedDataType": ":request:mappings",
+        "attributePath": ":request:mappings:host",
+        "attributeGridPath": ":request:mappings:host"
       },
       {
         "technicalColumnName": "effectiveFrom",
         "isMandatory": true,
-        "derivedDataType": ":request:mappings"
+        "derivedDataType": ":request:mappings",
+        "attributePath": ":request:mappings:effectiveFrom",
+        "attributeGridPath": ":request:mappings:effectiveFrom"
       },
       {
         "technicalColumnName": "effectiveTill",
         "isMandatory": false,
-        "derivedDataType": ":request:mappings"
+        "derivedDataType": ":request:mappings",
+        "attributePath": ":request:mappings:effectiveTill",
+        "attributeGridPath": ":request:mappings:effectiveTill"
       },
       {
         "technicalColumnName": "deleted",
         "isMandatory": false,
-        "derivedDataType": ":request:mappings"
+        "derivedDataType": ":request:mappings",
+        "attributePath": ":request:mappings:deleted",
+        "attributeGridPath": ":request:mappings:deleted"
       }
     ],
     "responseBodyColumnList": [
       {
         "technicalColumnName": "id",
         "isMandatory": false,
-        "derivedDataType": ":response:results"
+        "derivedDataType": ":response:results",
+        "attributePath": ":response:results:id",
+        "attributeGridPath": ":response:results:id"
       },
       {
         "technicalColumnName": "demandCode",
         "isMandatory": true,
-        "derivedDataType": ":response:results"
+        "derivedDataType": ":response:results",
+        "attributePath": ":response:results:demandCode",
+        "attributeGridPath": ":response:results:demandCode"
       },
       {
         "technicalColumnName": "description",
         "isMandatory": false,
-        "derivedDataType": ":response:results"
+        "derivedDataType": ":response:results",
+        "attributePath": ":response:results:description",
+        "attributeGridPath": ":response:results:description"
       },
       {
         "technicalColumnName": "demandCodeGroup",
         "isMandatory": false,
-        "derivedDataType": ":response:results"
+        "derivedDataType": ":response:results",
+        "attributePath": ":response:results:demandCodeGroup",
+        "attributeGridPath": ":response:results:demandCodeGroup"
       },
       {
         "technicalColumnName": "deleted",
         "isMandatory": false,
-        "derivedDataType": ":response:results"
+        "derivedDataType": ":response:results",
+        "attributePath": ":response:results:deleted",
+        "attributeGridPath": ":response:results:deleted"
       },
       {
         "technicalColumnName": "id",
         "isMandatory": false,
-        "derivedDataType": ":response:results:props"
+        "derivedDataType": ":response:results:props",
+        "attributePath": ":response:results:props:id",
+        "attributeGridPath": ":response:results:props:id"
       },
       {
         "technicalColumnName": "demandCode",
         "isMandatory": true,
-        "derivedDataType": ":response:results:props"
+        "derivedDataType": ":response:results:props",
+        "attributePath": ":response:results:props:demandCode",
+        "attributeGridPath": ":response:results:props:demandCode"
       },
       {
         "technicalColumnName": "demandAggregationPeriod",
         "isMandatory": true,
-        "derivedDataType": ":response:results:props"
+        "derivedDataType": ":response:results:props",
+        "attributePath": ":response:results:props:demandAggregationPeriod",
+        "attributeGridPath": ":response:results:props:demandAggregationPeriod"
       },
       {
         "technicalColumnName": "drillDownAggregationPeriod",
         "isMandatory": false,
-        "derivedDataType": ":response:results:props"
+        "derivedDataType": ":response:results:props",
+        "attributePath": ":response:results:props:drillDownAggregationPeriod",
+        "attributeGridPath": ":response:results:props:drillDownAggregationPeriod"
       },
       {
         "technicalColumnName": "effectiveFrom",
         "isMandatory": true,
-        "derivedDataType": ":response:results:props"
+        "derivedDataType": ":response:results:props",
+        "attributePath": ":response:results:props:effectiveFrom",
+        "attributeGridPath": ":response:results:props:effectiveFrom"
       },
       {
         "technicalColumnName": "effectiveTill",
         "isMandatory": false,
-        "derivedDataType": ":response:results:props"
+        "derivedDataType": ":response:results:props",
+        "attributePath": ":response:results:props:effectiveTill",
+        "attributeGridPath": ":response:results:props:effectiveTill"
       },
       {
         "technicalColumnName": "deleted",
         "isMandatory": false,
-        "derivedDataType": ":response:results:props"
+        "derivedDataType": ":response:results:props",
+        "attributePath": ":response:results:props:deleted",
+        "attributeGridPath": ":response:results:props:deleted"
       },
       {
         "technicalColumnName": "id",
         "isMandatory": false,
-        "derivedDataType": ":response:results:mappings"
+        "derivedDataType": ":response:results:mappings",
+        "attributePath": ":response:results:mappings:id",
+        "attributeGridPath": ":response:results:mappings:id"
       },
       {
         "technicalColumnName": "demandCode",
         "isMandatory": true,
-        "derivedDataType": ":response:results:mappings"
+        "derivedDataType": ":response:results:mappings",
+        "attributePath": ":response:results:mappings:demandCode",
+        "attributeGridPath": ":response:results:mappings:demandCode"
       },
       {
         "technicalColumnName": "collectableEventCode",
         "isMandatory": true,
-        "derivedDataType": ":response:results:mappings"
+        "derivedDataType": ":response:results:mappings",
+        "attributePath": ":response:results:mappings:collectableEventCode",
+        "attributeGridPath": ":response:results:mappings:collectableEventCode"
       },
       {
         "technicalColumnName": "host",
         "isMandatory": true,
-        "derivedDataType": ":response:results:mappings"
+        "derivedDataType": ":response:results:mappings",
+        "attributePath": ":response:results:mappings:host",
+        "attributeGridPath": ":response:results:mappings:host"
       },
       {
         "technicalColumnName": "effectiveFrom",
         "isMandatory": true,
-        "derivedDataType": ":response:results:mappings"
+        "derivedDataType": ":response:results:mappings",
+        "attributePath": ":response:results:mappings:effectiveFrom",
+        "attributeGridPath": ":response:results:mappings:effectiveFrom"
       },
       {
         "technicalColumnName": "effectiveTill",
         "isMandatory": false,
-        "derivedDataType": ":response:results:mappings"
+        "derivedDataType": ":response:results:mappings",
+        "attributePath": ":response:results:mappings:effectiveTill",
+        "attributeGridPath": ":response:results:mappings:effectiveTill"
       },
       {
         "technicalColumnName": "deleted",
         "isMandatory": false,
-        "derivedDataType": ":response:results:mappings"
+        "derivedDataType": ":response:results:mappings",
+        "attributePath": ":response:results:mappings:deleted",
+        "attributeGridPath": ":response:results:mappings:deleted"
       },
       {
         "technicalColumnName": "timestamp",
         "isMandatory": true,
-        "derivedDataType": ":response:errorResponse"
+        "derivedDataType": ":response:errorResponse",
+        "attributePath": ":response:errorResponse:timestamp",
+        "attributeGridPath": ":response:errorResponse:timestamp"
       },
       {
         "technicalColumnName": "code",
         "isMandatory": true,
-        "derivedDataType": ":response:errorResponse"
+        "derivedDataType": ":response:errorResponse",
+        "attributePath": ":response:errorResponse:code",
+        "attributeGridPath": ":response:errorResponse:code"
       },
       {
         "technicalColumnName": "message",
         "isMandatory": true,
-        "derivedDataType": ":response:errorResponse"
+        "derivedDataType": ":response:errorResponse",
+        "attributePath": ":response:errorResponse:message",
+        "attributeGridPath": ":response:errorResponse:message"
       },
       {
         "technicalColumnName": "correlationId",
         "isMandatory": true,
-        "derivedDataType": ":response:errorResponse"
+        "derivedDataType": ":response:errorResponse",
+        "attributePath": ":response:errorResponse:correlationId",
+        "attributeGridPath": ":response:errorResponse:correlationId"
       },
       {
         "technicalColumnName": "path",
         "isMandatory": true,
-        "derivedDataType": ":response:errorResponse"
+        "derivedDataType": ":response:errorResponse",
+        "attributePath": ":response:errorResponse:path",
+        "attributeGridPath": ":response:errorResponse:path"
       },
       {
         "technicalColumnName": "status",
         "isMandatory": true,
-        "derivedDataType": ":response:errorResponse"
+        "derivedDataType": ":response:errorResponse",
+        "attributePath": ":response:errorResponse:status",
+        "attributeGridPath": ":response:errorResponse:status"
       }
     ]
   }

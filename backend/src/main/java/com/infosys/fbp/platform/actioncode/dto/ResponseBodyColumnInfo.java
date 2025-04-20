@@ -30,4 +30,6 @@ public class ResponseBodyColumnInfo {
      * prefixed with ":response". Example: ":response:data:id", ":response:errors:code".
      */
     private String derivedDataType;
+    private String attributePath; // New field: derivedDataType + ":" + technicalColumnName (for grid field ID)
+    private String attributeGridPath; // New field: derivedDataType + ":" + technicalColumnName (for grid header)
 }

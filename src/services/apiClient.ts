@@ -9,7 +9,7 @@ const JAVA_API_BASE_URL = 'http://localhost:8080'; // Java Backend server addres
 export const fetchActionList = async (): Promise<Action[]> => {
   try {
     // Updated to use the Java backend endpoint
-    const response = await fetch(`${JAVA_API_BASE_URL}/api/action-codes`);
+    const response = await fetch(`${JAVA_API_BASE_URL}/api/actions`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }

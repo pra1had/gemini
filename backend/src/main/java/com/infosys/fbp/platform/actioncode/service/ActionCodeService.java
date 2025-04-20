@@ -372,21 +372,33 @@ public class ActionCodeService {
                      String derivedDataType = calculateDerivedDataType(currentPath, pathPrefix); // Use currentPath
 
                      if (":request".equals(pathPrefix)) {
-                         RequestBodyColumnInfo columnInfo = new RequestBodyColumnInfo();
-                        columnInfo.setTechnicalColumnName(propertyName);
-                         columnInfo.setMandatory(isMandatory);
-                         columnInfo.setDerivedDataType(derivedDataType); // Set using parent path
-                         columns.add(columnInfo);
-                     } else if (":response".equals(pathPrefix)) {
-                         ResponseBodyColumnInfo columnInfo = new ResponseBodyColumnInfo();
-                         columnInfo.setTechnicalColumnName(propertyName);
-                         // Note: 'mandatory' for response might mean 'defined' or 'always present'
-                         // Use the 'isMandatory' flag derived from the parent schema's required list.
-                         columnInfo.setMandatory(isMandatory); // Use the calculated mandatory status
-                         columnInfo.setDerivedDataType(derivedDataType); // Set using parent path
-                         columns.add(columnInfo);
-                     } else {
-                         log.warn("Unknown path prefix '{}' during schema flattening.", pathPrefix);
+                          // Calculate the new path fields
+                          String attributePathValue = derivedDataType + ":" + propertyName;
+                          String attributeGridPathValue = derivedDataType + ":" + propertyName; // Same for now
+
+                          RequestBodyColumnInfo columnInfo = new RequestBodyColumnInfo();
+                          columnInfo.setTechnicalColumnName(propertyName);
+                          columnInfo.setMandatory(isMandatory);
+                          columnInfo.setDerivedDataType(derivedDataType); // Set using parent path
+                          columnInfo.setAttributePath(attributePathValue); // Set new field
+                          columnInfo.setAttributeGridPath(attributeGridPathValue); // Set new field
+                          columns.add(columnInfo);
+                      } else if (":response".equals(pathPrefix)) {
+                          // Calculate the new path fields
+                          String attributePathValue = derivedDataType + ":" + propertyName;
+                          String attributeGridPathValue = derivedDataType + ":" + propertyName; // Same for now
+
+                          ResponseBodyColumnInfo columnInfo = new ResponseBodyColumnInfo();
+                          columnInfo.setTechnicalColumnName(propertyName);
+                          // Note: 'mandatory' for response might mean 'defined' or 'always present'
+                          // Use the 'isMandatory' flag derived from the parent schema's required list.
+                          columnInfo.setMandatory(isMandatory); // Use the calculated mandatory status
+                          columnInfo.setDerivedDataType(derivedDataType); // Set using parent path
+                          columnInfo.setAttributePath(attributePathValue); // Set new field
+                          columnInfo.setAttributeGridPath(attributeGridPathValue); // Set new field
+                          columns.add(columnInfo);
+                      } else {
+                          log.warn("Unknown path prefix '{}' during schema flattening.", pathPrefix);
                     }
                 }
             });
