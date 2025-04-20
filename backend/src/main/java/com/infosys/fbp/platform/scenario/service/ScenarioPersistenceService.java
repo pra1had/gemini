@@ -1,8 +1,10 @@
 package com.infosys.fbp.platform.scenario.service;
 
 import com.infosys.fbp.platform.scenario.dto.ScenarioDto;
+import com.infosys.fbp.platform.scenario.dto.ScenarioDto;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection; // Added import
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,12 +52,29 @@ public class ScenarioPersistenceService {
         return Optional.ofNullable(scenarioStore.get(scenarioId));
     }
 
+    /**
+     * Retrieves all scenarios currently stored in memory.
+     *
+     * @return A collection of all ScenarioDto objects.
+     */
+    public Collection<ScenarioDto> getAllScenarios() {
+        // Consider logging the retrieval operation
+        // log.info("Retrieving all {} scenarios.", scenarioStore.size());
+        return scenarioStore.values();
+    }
+
     // Optional: Method to clear the store or remove specific entries if needed
     // public void removeScenario(String scenarioId) {
     //     scenarioStore.remove(scenarioId);
     // }
-    //
-    // public void clearAllScenarios() {
-    //     scenarioStore.clear();
-    // }
+
+    /**
+     * Clears all scenarios from the in-memory store.
+     * Primarily intended for testing purposes.
+     */
+    public void clearAllScenarios() {
+        scenarioStore.clear();
+        // Consider logging the clear operation
+        // log.warn("Cleared all scenarios from the store.");
+    }
 }

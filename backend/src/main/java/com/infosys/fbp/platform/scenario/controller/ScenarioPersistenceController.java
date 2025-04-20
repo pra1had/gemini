@@ -5,9 +5,13 @@ import com.infosys.fbp.platform.scenario.service.ScenarioPersistenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collection; // Added import
 import java.util.Map;
 import java.util.Optional;
 
@@ -70,7 +74,20 @@ public class ScenarioPersistenceController {
 
         return scenarioOpt
                 .map(ResponseEntity::ok) // If present, return 200 OK with the scenario
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Scenario not found with ID: " + scenarioId)); // If not present, throw 404
+                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Scenario not found with ID: " + scenarioId)); // If not present, throw 404
+    }
+
+    /**
+     * Retrieves all currently stored scenarios.
+     *
+     * @return A response entity containing a collection of all ScenarioDto objects.
+     */
+    @GetMapping("/all")
+    public ResponseEntity<Collection<ScenarioDto>> getAllScenarios() {
+        Collection<ScenarioDto> allScenarios = persistenceService.getAllScenarios();
+        // Consider returning NO_CONTENT if the collection is empty, or just an empty list.
+        // Returning an empty list is generally more RESTful.
+        return ResponseEntity.ok(allScenarios);
     }
 
     // TODO: Consider adding endpoints for update and delete if needed for temporary persistence.

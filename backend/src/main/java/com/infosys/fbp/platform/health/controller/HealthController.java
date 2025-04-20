@@ -1,6 +1,7 @@
 package com.infosys.fbp.platform.health.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,6 +12,7 @@ import java.util.Map;
 /**
  * Controller for basic health check endpoint.
  */
+@CrossOrigin // Allow requests from any origin
 @RestController
 @RequestMapping("/health")
 public class HealthController {

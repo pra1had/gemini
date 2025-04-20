@@ -2,9 +2,13 @@ package com.infosys.fbp.platform.scenario.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.infosys.fbp.platform.scenario.dto.ScenarioDto;
 import com.infosys.fbp.platform.scenario.dto.ScenarioStepDataDto;
 import com.infosys.fbp.platform.scenario.dto.ScenarioStepDto;
+import com.infosys.fbp.platform.scenario.service.ScenarioPersistenceService; // Added import
+import org.junit.jupiter.api.BeforeEach; // Added import
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -13,11 +17,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.Collection; // Added import
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue; // Added import
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -31,6 +38,15 @@ class ScenarioPersistenceControllerIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ScenarioPersistenceService persistenceService; // Added service injection
+
+    @BeforeEach
+    void setUp() {
+        // Clear the in-memory store before each test
+        persistenceService.clearAllScenarios();
+    }
 
     // Updated test: Expects full DTO in response, uses provided ID
     @Test
@@ -147,5 +163,46 @@ class ScenarioPersistenceControllerIntegrationTest {
         mockMvc.perform(get("/api/scenarios/load/{scenarioId}", testId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.scenarioName", is("Updated Integ Scenario")));
+    }
+
+    @Test
+    void getAllScenarios_shouldReturnAllSavedScenarios() throws Exception {
+        // Arrange: Save two scenarios
+        String id1 = "all-test-id-1";
+        String id2 = "all-test-id-2";
+        ScenarioDto scenario1 = createTestScenario(id1, "Scenario One for All");
+        ScenarioDto scenario2 = createTestScenario(id2, "Scenario Two for All");
+
+        mockMvc.perform(post("/api/scenarios/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(scenario1)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/scenarios/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(scenario2)))
+                .andExpect(status().isCreated());
+
+        // Act
+        MvcResult result = mockMvc.perform(get("/api/scenarios/all"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andReturn(); // Return the result
+
+        // Assert - Manually parse and check
+        String responseBody = result.getResponse().getContentAsString();
+        // System.out.println("Raw Response Body:\n" + responseBody); // Optional: Add logging to see the raw string
+        List<ScenarioDto> returnedScenarios = objectMapper.readValue(responseBody, new TypeReference<List<ScenarioDto>>() {});
+
+        assertEquals(2, returnedScenarios.size(), "Should return exactly 2 scenarios");
+        assertTrue(returnedScenarios.stream().anyMatch(s -> s.getScenarioId().equals(id1)), "Scenario with id1 should be present");
+        assertTrue(returnedScenarios.stream().anyMatch(s -> s.getScenarioId().equals(id2)), "Scenario with id2 should be present");
+
+        // Keep original jsonPath assertions commented out for now, but they should pass if manual parsing works
+        // .andExpect(jsonPath("$", hasSize(2)))
+        // .andExpect(jsonPath("$", hasItems(
+        //         hasProperty("scenarioId", is(id1)),
+        //         hasProperty("scenarioId", is(id2))
+        // )));
     }
 }
