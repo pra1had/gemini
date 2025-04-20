@@ -1,5 +1,6 @@
 package com.infosys.fbp.platform.actioncode.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty; // Import JsonProperty
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,8 @@ public class ResponseBodyColumnInfo {
      * Note: OpenAPI 'required' is less common/enforced for responses compared to requests.
      * This might represent whether the field is *defined* rather than strictly mandatory.
      */
-    private boolean mandatory; // Or consider renaming to 'defined' or similar if 'mandatory' is misleading for responses
+    @JsonProperty("isMandatory") // Explicitly map JSON property name
+    private boolean isMandatory; // Renamed from 'mandatory'
 
     /**
      * A derived path indicating the field's location in the original nested structure,

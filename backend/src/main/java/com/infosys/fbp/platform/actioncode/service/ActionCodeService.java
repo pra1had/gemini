@@ -380,8 +380,8 @@ public class ActionCodeService {
                         ResponseBodyColumnInfo columnInfo = new ResponseBodyColumnInfo();
                         columnInfo.setTechnicalColumnName(propertyName);
                         // Note: 'mandatory' for response might mean 'defined' or 'always present'
-                        // Forcing to false based on test expectations and common interpretation.
-                        columnInfo.setMandatory(false); // Always false for response fields
+                        // Use the 'isMandatory' flag derived from the parent schema's required list.
+                        columnInfo.setMandatory(isMandatory); // Use the calculated mandatory status
                         columnInfo.setDerivedDataType(derivedDataType);
                         columns.add(columnInfo);
                     } else {
