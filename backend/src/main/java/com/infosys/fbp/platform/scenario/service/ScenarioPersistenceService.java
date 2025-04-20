@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -13,59 +14,41 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class ScenarioPersistenceService {
 
-    // Use ConcurrentHashMap for thread safety if multiple requests might access it concurrently
-    private final Map<String, ScenarioDto> temporaryStorage = new ConcurrentHashMap<>();
+    // Use ConcurrentHashMap for basic thread safety in a web environment
+    private final Map<String, ScenarioDto> scenarioStore = new ConcurrentHashMap<>();
 
     /**
-     * Saves or updates a scenario in the temporary storage.
+     * Saves a scenario to the in-memory store.
      *
-     * @param scenarioId The unique identifier for the scenario.
      * @param scenarioDto The scenario data to save.
+     * @return The generated unique ID for the saved scenario.
      */
-    public void saveScenario(String scenarioId, ScenarioDto scenarioDto) {
-        if (scenarioId == null || scenarioId.isBlank()) {
-            throw new IllegalArgumentException("Scenario ID cannot be null or empty.");
-        }
-        if (scenarioDto == null) {
-            throw new IllegalArgumentException("Scenario data cannot be null.");
-        }
-        temporaryStorage.put(scenarioId, scenarioDto);
-        // In a real application, consider logging successful save
+    public String saveScenario(ScenarioDto scenarioDto) {
+        String scenarioId = UUID.randomUUID().toString();
+        scenarioStore.put(scenarioId, scenarioDto);
+        // Consider logging the save operation
+        // log.info("Scenario saved with ID: {}", scenarioId);
+        return scenarioId;
     }
 
     /**
-     * Loads a scenario from the temporary storage.
+     * Loads a scenario from the in-memory store by its ID.
      *
-     * @param scenarioId The unique identifier for the scenario to load.
-     * @return An Optional containing the ScenarioDto if found, otherwise an empty Optional.
+     * @param scenarioId The unique ID of the scenario to load.
+     * @return An Optional containing the ScenarioDto if found, otherwise empty.
      */
     public Optional<ScenarioDto> loadScenario(String scenarioId) {
-        if (scenarioId == null || scenarioId.isBlank()) {
-            // Or return Optional.empty() depending on desired behavior for invalid IDs
-            throw new IllegalArgumentException("Scenario ID cannot be null or empty.");
-        }
-        return Optional.ofNullable(temporaryStorage.get(scenarioId));
+        // Consider logging the load attempt
+        // log.info("Attempting to load scenario with ID: {}", scenarioId);
+        return Optional.ofNullable(scenarioStore.get(scenarioId));
     }
 
-    /**
-     * Deletes a scenario from the temporary storage.
-     * (Optional, might be useful for cleanup or explicit deletion)
-     *
-     * @param scenarioId The unique identifier for the scenario to delete.
-     * @return true if a scenario was removed, false otherwise.
-     */
-    public boolean deleteScenario(String scenarioId) {
-         if (scenarioId == null || scenarioId.isBlank()) {
-            return false; // Or throw exception
-        }
-        return temporaryStorage.remove(scenarioId) != null;
-    }
-
-    /**
-     * Clears all scenarios from temporary storage.
-     * (Useful for testing or specific reset scenarios)
-     */
-    public void clearAllScenarios() {
-        temporaryStorage.clear();
-    }
+    // Optional: Method to clear the store or remove specific entries if needed
+    // public void removeScenario(String scenarioId) {
+    //     scenarioStore.remove(scenarioId);
+    // }
+    //
+    // public void clearAllScenarios() {
+    //     scenarioStore.clear();
+    // }
 }
