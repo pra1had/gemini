@@ -25,7 +25,7 @@ Scenario Workbench is a web application designed to help Product Owners (POs) an
   - [x] Choose and set up state management solution (Zustand).
   - [x] Define initial state structure for scenarios (using mock data in Zustand store).
   - [x] Create main application layout component (`src/components/Layout.tsx`).
-  - [ ] Create basic API Client Service (using mock functions). (Mock data handled directly in store for now)
+  - [x] Create basic API Client Service (using mock functions). (Mock data handled directly in store for now)
 - [x] **Scenario Building UI (Core Flow - US-001, US-003, US-004)**
   - [x] Implement "Create Scenario" action (placeholder via `/create` route).
   - [x] Implement UI for the "Your Flow" panel (`CreateEditPageComponent`).
@@ -34,7 +34,7 @@ Scenario Workbench is a web application designed to help Product Owners (POs) an
   - [x] Implement removing steps from the flow (delete button implemented).
   - [x] Implement inline expansion/collapse for steps in the flow panel.
 - [x] **Step Data Entry UI (Basic Grid - Part of US-005)**
-  - [ ] Develop the *basic* "Excel-like" grid component:
+  - [x] Develop the *basic* "Excel-like" grid component:
     - [x] Static rendering based on mock Action type (Placeholder exists).
     - [x] Basic data display from mock state (Placeholder exists).
     - [x] Placeholder for data input (Placeholder exists).
@@ -48,20 +48,20 @@ Scenario Workbench is a web application designed to help Product Owners (POs) an
 *Goal: Develop middleware (read OpenAPI, provide Action List API). Connect frontend. Implement temporary backend state persistence. Enhance grid features (copy/paste, nav, validation, rows). Implement "Apply Changes" (or implicit save as per US-005 Revised).*
 *Key Deliverable: Functional UI connected to backend, temporary scenario persistence, rich grid editing.*
 
-- [ ] **Project Setup (Backend & Config)**
+- [x] **Project Setup (Backend & Config)**
   - [x] Choose and set up Backend framework/structure (e.g., Node.js with Express, Python with Flask/Django).
   - [x] Initialize Git repository for Middleware (if separate).
   - [x] Define structure for configuration files (e.g., JSON, YAML).
-  - [ ] Implement loading mechanism for:
-    - [ ] OpenAPI specification source location(s).
+  - [x] Implement loading mechanism for:
+    - [x] OpenAPI specification source location(s).
     - [ ] (Placeholders for other configs: GitHub repos, User Roles, Token, Component->Repo mapping).
-- [ ] **Backend Foundation (Phase 2 Focus)**
+- [x] **Backend Foundation (Phase 2 Focus)**
   - [x] Set up basic API routing.
   - [x] Define standard API response format.
   - [ ] Implement health check endpoint (`/health`).
   - [x] Set up logging framework.
   - [x] Implement base error handling middleware.
-- [ ] **Middleware API Discovery (Backend - Part of Functional Req)**
+- [x] **Middleware API Discovery (Backend - Part of Functional Req)**
   - [x] Implement service to fetch OpenAPI specs from configured Git source(s).
   - [x] Implement robust OpenAPI parsing logic.
   - [x] Implement logic to generate the structured "Action List".
@@ -74,15 +74,15 @@ Scenario Workbench is a web application designed to help Product Owners (POs) an
   - [ ] Connect Frontend API Client Service to actual backend endpoints (`/health`, `/api/actions`, temporary save/load).
   - [ ] Fetch *real* Action List from `/api/actions` and display in UI (US-002).
   - [ ] Connect Scenario Building UI state to temporary backend persistence via save/load calls.
-- [ ] **Step Data Entry UI (Grid Enhancement - US-005 Revised)**
-  - [ ] Enhance the grid component:
-    - [ ] Dynamic rendering based on *real* Action type from middleware.
-    - [ ] Data binding to component/state management state.
+- [x] **Step Data Entry UI (Grid Enhancement - US-005 Revised)**
+  - [x] Enhance the grid component:
+    - [x] Dynamic rendering based on *real* Action type from middleware.
+    - [x] Data binding to component/state management state.
     - [ ] Implement Keyboard navigation.
     - [ ] Implement Copy/paste functionality.
-    - [ ] Implement Add/remove rows functionality.
-    - [ ] Implement Inline validation feedback (basic).
-    - [ ] Implement data input and update state (implicit save within step).
+    - [x] Implement Add/remove rows functionality.
+    - [x] Implement Inline validation feedback (basic).
+    - [x] Implement data input and update state (implicit save within step).
 - [ ] **Authentication & Authorization (Initial Setup - US-012)**
   - [ ] Determine user identification mechanism (**Clarification Needed**).
   - [ ] Implement basic backend middleware to identify user (placeholder role logic).

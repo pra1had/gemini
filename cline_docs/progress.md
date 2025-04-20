@@ -16,7 +16,11 @@
 *   **Request/Response Body Processing:**
     *   `ActionCodeService` includes logic (`flattenSchemaGeneric`, `processRequestBody`, `processResponseBody`) to flatten both request and response body schemas found in OpenAPI specs (handling 200, 201, default responses). The logic correctly handles the `mandatory` flag for response fields (setting it to `false`).
     *   `ActionCodeInfo` DTO includes lists for both flattened request and response columns.
-*   **Core Service Tests Passing:** The unit tests in `ActionCodeServiceTest.java` (using `MockRestServiceServer` for HTTP mocking) are passing, verifying the core logic for manifest/schema fetching, parsing, path validation, and request/response body flattening against the defined test cases.
+*   **Grid Path Redesign:**
+    *   Added `attributePath` and `attributeGridPath` fields to `RequestBodyColumnInfo` and `ResponseBodyColumnInfo` DTOs.
+    *   Updated `ActionCodeService` to populate these fields.
+    *   Updated test data JSONs (`ActionCodeList.json`, `ActionCodeList_complexSchema.json`) with expected values.
+*   **Core Service Tests Passing:** The unit tests in `ActionCodeServiceTest.java` (using `MockRestServiceServer` for HTTP mocking) are passing, including tests covering the grid path redesign changes.
 
 ### What's Left to Build / Verify (Backend)
 
@@ -38,9 +42,9 @@
 
 ### Progress Status (Backend)
 
-*   **Core Functionality Implemented & Tested:** The basic code structure is present. The core logic in `ActionCodeService` (manifest/schema fetching & parsing, path validation, request/response body flattening) is implemented and verified by passing unit tests (`ActionCodeServiceTest.java` using `MockRestServiceServer`).
-*   **Verification Needed:** HTTP client configuration (`RestTemplate` bean in `RestClientConfig.java`), controller logic (`ActionCodeController`), DTO alignment with the final expected output (`docs/resources/ActionCodeList.json`), and end-to-end integration still require verification and potentially implementation/refinement.
-*   **Testing Needs Expansion:** While core service tests pass, they need expansion to cover more complex scenarios and edge cases. Integration tests for the controller endpoint are still needed.
+*   **Core Functionality Implemented & Tested:** The basic code structure is present. The core logic in `ActionCodeService` (manifest/schema fetching & parsing, path validation, request/response body flattening, grid path generation) is implemented and verified by passing unit tests (`ActionCodeServiceTest.java` using `MockRestServiceServer`).
+*   **Verification Needed:** HTTP client configuration (`RestTemplate` bean in `RestClientConfig.java`), controller logic (`ActionCodeController`), and end-to-end integration still require verification and potentially implementation/refinement. DTO alignment with the final expected output is confirmed via updated test data JSONs.
+*   **Testing Needs Expansion:** While core service tests pass, they need expansion to cover more complex scenarios and edge cases not covered by the current test data. Integration tests for the controller endpoint are still needed.
 
 ---
 
@@ -61,10 +65,10 @@
     *   Removing steps implemented (delete button).
     *   Inline expansion/collapse for steps implemented.
 *   **Step Data Entry UI (Basic Grid - Part of US-005):**
-    *   Basic grid component placeholder (`StepDataGrid.tsx`) exists.
-    *   Static rendering based on mock Action type (placeholder).
-    *   Basic data display from mock state (placeholder).
+    *   Basic grid component (`StepDataGrid.tsx`) exists and renders dynamically based on action schema.
+    *   Includes data binding, add/remove rows, basic validation, and uses `attributePath`/`attributeGridPath` for columns.
 *   **Mock Data:** Mock Action List and Scenario structure defined in Zustand store (`scenarioStore.ts`).
+*   **Grid Path Redesign:** Updated `StepDataGrid.tsx` and `scenarioStore.ts` types to use `attributePath` and `attributeGridPath`.
 
 ### What's Left to Build / Verify (Frontend - Primarily Phase 2 onwards)
 
@@ -73,11 +77,8 @@
     *   Fetch and display the *real* Action List from `/api/actions` (US-002).
     *   Connect UI state to backend persistence (initially temporary, then Git via backend).
 2.  **Step Data Entry UI (Grid Enhancement - Phase 2 - US-005 Revised):**
-    *   Implement dynamic grid rendering based on *real* Action types.
-    *   Implement full data binding to Zustand state.
-    *   Implement keyboard navigation, copy/paste, add/remove rows.
-    *   Implement inline validation feedback.
-    *   Implement data input/update logic (implicit save to state).
+    *   Implement keyboard navigation.
+    *   Implement copy/paste functionality.
 3.  **Markdown/Excel Features (Phase 3):**
     *   Implement "Export" button and connect to backend endpoint (US-011).
     *   Verify save/load uses Markdown format via backend.
@@ -94,7 +95,7 @@
 
 ### Progress Status (Frontend)
 
-*   **Phase 1 Largely Complete:** The core UI foundation, layout, routing, state management (with mocks), and basic scenario flow interactions (add, remove, reorder, expand/collapse steps) are implemented.
-*   **Basic Grid Placeholder:** A placeholder for the data entry grid exists but requires significant enhancement (Phase 2).
+*   **Phase 1 Complete:** The core UI foundation, layout, routing, state management (with mocks), and basic scenario flow interactions (add, remove, reorder, expand/collapse steps) are implemented.
+*   **Grid Component Enhanced (Phase 2):** The `StepDataGrid` component now dynamically renders columns based on action schema using `attributePath`/`attributeGridPath`, supports data binding, add/remove rows, and basic validation. Keyboard navigation and copy/paste are pending.
 *   **Backend Connection Pending:** The frontend currently uses mock data and needs to be connected to the backend API endpoints (Phase 2).
 *   **Advanced Features Pending:** Markdown/Excel generation, Git integration, final search/save/load/duplicate flows, and role-based access are planned for later phases.
