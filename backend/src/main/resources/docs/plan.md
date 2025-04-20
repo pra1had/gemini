@@ -64,7 +64,7 @@ This document outlines the plan for creating the backend utility service to gene
 *   A standard Spring Boot `@RestController` named `ActionCodeController` will be created in `com.infosys.fbp.platform.actioncode.controller`.
 *   It will be annotated with `@RequestMapping("/api")` or similar base path if desired.
 *   Inject the `ActionCodeService` via constructor injection.
-*   Define a `@GetMapping("/action-codes")` endpoint method that calls `actionCodeService.generateActionCodeList()` and returns the result. Spring Boot will automatically handle JSON serialization.
+*   Define a `@GetMapping("/actions")` endpoint method that calls `actionCodeService.generateActionCodeList()` and returns the result. Spring Boot will automatically handle JSON serialization.
 
 **5. Error Handling & File Access:**
 

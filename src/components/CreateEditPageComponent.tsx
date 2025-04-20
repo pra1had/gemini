@@ -22,6 +22,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useScenarioStore, Action } from '@/store/scenarioStore';
+// Removed import for checkBackendHealth as endpoint is not ready
 import { SortableStepItem } from '@/components/SortableStepItem';
 import Layout from '@/components/Layout'; // Import Layout
 
@@ -61,11 +62,13 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
     // Load scenario data based on the prop passed from the page route
     loadScenario(scenarioId ?? null);
     // Fetch available actions when the component mounts
+    // Removed health check as the backend endpoint is not ready
     fetchAndSetAvailableActions().then(() => {
         console.log("Finished fetching actions.");
-    }).catch(err => {
+    }).catch((err: unknown) => { // Add type for err
         console.error("Error during action fetch in useEffect:", err);
     });
+
     // Dependencies: scenarioId ensures reload if navigating between edit pages,
     // loadScenario and fetchAndSetAvailableActions are stable references from Zustand.
   }, [scenarioId, loadScenario, fetchAndSetAvailableActions]);

@@ -32,12 +32,12 @@
     *   Verify accurate extraction/mapping of all fields against the specification in `productContext.md` with potentially more complex real-world schemas.
     *   **Further verify the implementation of the recursive request and response body flattening logic** (`flattenSchemaGeneric`) handles *more complex* nested structures, arrays (e.g., arrays of objects, arrays of arrays), and `$ref` resolution edge cases beyond the current test coverage.
 3.  **Verify Controller Logic (`ActionCodeController`):**
-    *   Confirm the `@GetMapping("/action-codes")` endpoint is correctly defined and functional.
+    *   Confirm the `@GetMapping("/api/actions")` endpoint is correctly defined and functional.
     *   Ensure it calls the `ActionCodeService` and returns the results appropriately serialized as JSON.
 4.  **Verify DTOs:** Ensure the DTO structures accurately reflect the target JSON output format specified in the *final* expected output definition (e.g., compare with `docs/resources/ActionCodeList.json` if that's the definitive source).
 5.  **Testing:**
     *   **Expand `ActionCodeServiceTest.java`:** Add more test cases covering diverse schema structures (e.g., deeper nesting, different array types, more complex refs), network edge cases (timeouts, different HTTP errors), and parsing edge cases.
-    *   **Implement Integration Tests:** Create integration tests for the `/action-codes` endpoint to verify the full flow from HTTP request to response, potentially using `MockRestServiceServer` or WireMock for external dependencies.
+    *   **Implement Integration Tests:** Create integration tests for the `/api/actions` endpoint to verify the full flow from HTTP request to response, potentially using `MockRestServiceServer` or WireMock for external dependencies.
 6.  **Error Handling:** Ensure robust error handling is implemented and tested for HTTP client errors (timeouts, connection issues, 4xx/5xx responses) and parsing errors throughout the service and controller layers.
 
 ### Progress Status (Backend)

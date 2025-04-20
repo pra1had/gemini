@@ -8,7 +8,7 @@ const JAVA_API_BASE_URL = 'http://localhost:8080'; // Java Backend server addres
  */
 export const fetchActionList = async (): Promise<Action[]> => {
   try {
-    // Updated to use the Java backend endpoint
+    // Correct endpoint for the frontend as per ActionCodeController.java
     const response = await fetch(`${JAVA_API_BASE_URL}/api/actions`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -24,13 +24,14 @@ export const fetchActionList = async (): Promise<Action[]> => {
 };
 
 /**
- * Checks the health of the backend server.
+ * Checks the health of the Java backend server.
  */
 export const checkBackendHealth = async (): Promise<boolean> => {
     try {
-        const response = await fetch(`${API_BASE_URL}/health`);
+        // Updated to use the Java backend endpoint
+        const response = await fetch(`${JAVA_API_BASE_URL}/health`);
         if (!response.ok) {
-            console.error("Backend health check failed:", response.status);
+            console.error("Java Backend health check failed:", response.status);
             return false;
         }
         const data = await response.json();

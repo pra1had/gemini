@@ -15,7 +15,7 @@ The system is a Java application built using the Spring Boot framework. It follo
     *   Extracting and transforming data from the parsed schemas and manifest.
     *   Mapping extracted data into Data Transfer Objects (DTOs).
     *   Handling errors during HTTP fetching and parsing.
-3.  **Data Transfer Objects (DTOs):** Plain Old Java Objects (POJOs) located in the `*.dto` package. Used to structure the data returned by the service and controller layers, specifically for the `/action-codes` endpoint response. Key DTOs include `ActionCodeInfo`, `PathPropertyListMap`, `ParameterInfo`, and `RequestBodyColumnInfo`.
+3.  **Data Transfer Objects (DTOs):** Plain Old Java Objects (POJOs) located in the `*.dto` package. Used to structure the data returned by the service and controller layers, specifically for the `/api/actions` endpoint response. Key DTOs include `ActionCodeInfo`, `PathPropertyListMap`, `ParameterInfo`, `RequestBodyColumnInfo`, and `ResponseBodyColumnInfo`.
 
 ### Key Technical Decisions
 
