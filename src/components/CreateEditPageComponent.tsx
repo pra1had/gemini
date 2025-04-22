@@ -146,6 +146,46 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
       for (let i = 0; i < numRows; i++) {
         worksheet[`A${startRow + i}`] = { v: '' };
       }
+      return startRow + numRows;
+    };
+
+    // Helper function to create a table
+    const createTable = (ws: XLSX.WorkSheet, data: any[][], startRow: number, tableName: string) => {
+      // Add the data first
+      XLSX.utils.sheet_add_aoa(ws, data, { origin: `A${startRow}` });
+
+      // Calculate the range for the table
+      const endRow = startRow + data.length - 1;
+      const endCol = XLSX.utils.encode_col(data[0].length - 1);
+      
+      // Define the table
+      const tableRef = `A${startRow}:${endCol}${endRow}`;
+      
+      if (!ws['!tables']) ws['!tables'] = [];
+      ws['!tables'].push({
+        ref: tableRef,
+        name: tableName,
+        headerRow: true,
+        totalsRow: false,
+        displayName: tableName,
+        tableStyleInfo: {
+          name: "TableStyleMedium2",
+          showFirstColumn: false,
+          showLastColumn: false,
+          showRowStripes: true,
+          showColumnStripes: false
+        }
+      });
+
+      // Update the worksheet range if needed
+      const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+      const tableRange = XLSX.utils.decode_range(tableRef);
+      range.e.r = Math.max(range.e.r, tableRange.e.r);
+      range.e.c = Math.max(range.e.c, tableRange.e.c);
+      ws['!ref'] = XLSX.utils.encode_range(range);
+
+      // Return the next row position
+      return endRow + 1;
     };
 
     // Process each step
@@ -155,19 +195,24 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
 
       // Create a new worksheet for each step
       const ws = XLSX.utils.aoa_to_sheet([]);
-      
+      let currentRow = 1;
+
       // Add step header
-      ws['A1'] = { v: `Step ${stepIndex + 1}: ${action.actionCode}` };
-      ws['A2'] = { v: `Component: ${action.componentName}` };
-      ws['A3'] = { v: `Group: ${action.actionCodeGroupName}` };
-      
-      // Add spacing
-      addSpacingRows(ws, 4, 2);
+      ws[`A${currentRow}`] = { v: `Step ${stepIndex + 1}: ${action.actionCode}` };
+      currentRow++;
+      ws[`A${currentRow}`] = { v: `Component: ${action.componentName}` };
+      currentRow++;
+      ws[`A${currentRow}`] = { v: `Group: ${action.actionCodeGroupName}` };
+      currentRow++;
+
+      // Add spacing after header
+      currentRow = addSpacingRows(ws, currentRow + 1, 2);
 
       // Process parameters
       if (step.stepParamsData && step.stepParamsData.length > 0) {
-        ws['A6'] = { v: 'Parameters' };
-        
+        ws[`A${currentRow}`] = { v: 'Parameters' };
+        currentRow++;
+
         // Get all unique parameter names
         const paramNames = new Set<string>();
         step.stepParamsData.forEach((row: StepRowData) => {
@@ -178,11 +223,8 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
           });
         });
 
-        // Add parameter headers
+        // Prepare table data
         const headers = ['ID', ...Array.from(paramNames)];
-        XLSX.utils.sheet_add_aoa(ws, [headers], { origin: 'A7' });
-
-        // Add parameter data
         const data = step.stepParamsData.map((row: StepRowData) => {
           const rowData = [row.id];
           paramNames.forEach(param => {
@@ -190,18 +232,17 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
           });
           return rowData;
         });
-        XLSX.utils.sheet_add_aoa(ws, data, { origin: 'A8' });
-      }
 
-      // Add spacing between sections
-      const lastRow = XLSX.utils.decode_range(ws['!ref'] || 'A1').e.r;
-      addSpacingRows(ws, lastRow + 2, 2);
+        // Create table and get next row position
+        currentRow = createTable(ws, [headers, ...data], currentRow, `Parameters_Step${stepIndex + 1}`);
+        currentRow = addSpacingRows(ws, currentRow + 1, 2);
+      }
 
       // Process request body
       if (step.stepRequestData && step.stepRequestData.length > 0) {
-        const requestStartRow = lastRow + 4;
-        ws[`A${requestStartRow}`] = { v: 'Request Body' };
-        
+        ws[`A${currentRow}`] = { v: 'Request Body' };
+        currentRow++;
+
         // Get all unique field names
         const fieldNames = new Set<string>();
         step.stepRequestData.forEach((row: StepRowData) => {
@@ -212,11 +253,8 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
           });
         });
 
-        // Add request headers
+        // Prepare table data
         const headers = ['ID', ...Array.from(fieldNames)];
-        XLSX.utils.sheet_add_aoa(ws, [headers], { origin: `A${requestStartRow + 1}` });
-
-        // Add request data
         const data = step.stepRequestData.map((row: StepRowData) => {
           const rowData = [row.id];
           fieldNames.forEach(field => {
@@ -224,18 +262,17 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
           });
           return rowData;
         });
-        XLSX.utils.sheet_add_aoa(ws, data, { origin: `A${requestStartRow + 2}` });
-      }
 
-      // Add spacing between sections
-      const lastRow2 = XLSX.utils.decode_range(ws['!ref'] || 'A1').e.r;
-      addSpacingRows(ws, lastRow2 + 2, 2);
+        // Create table and get next row position
+        currentRow = createTable(ws, [headers, ...data], currentRow, `Request_Step${stepIndex + 1}`);
+        currentRow = addSpacingRows(ws, currentRow + 1, 2);
+      }
 
       // Process response body
       if (step.stepResponseData && step.stepResponseData.length > 0) {
-        const responseStartRow = lastRow2 + 4;
-        ws[`A${responseStartRow}`] = { v: 'Response Body' };
-        
+        ws[`A${currentRow}`] = { v: 'Response Body' };
+        currentRow++;
+
         // Get all unique field names
         const fieldNames = new Set<string>();
         step.stepResponseData.forEach((row: StepRowData) => {
@@ -246,11 +283,8 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
           });
         });
 
-        // Add response headers
+        // Prepare table data
         const headers = ['ID', ...Array.from(fieldNames)];
-        XLSX.utils.sheet_add_aoa(ws, [headers], { origin: `A${responseStartRow + 1}` });
-
-        // Add response data
         const data = step.stepResponseData.map((row: StepRowData) => {
           const rowData = [row.id];
           fieldNames.forEach(field => {
@@ -258,7 +292,9 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
           });
           return rowData;
         });
-        XLSX.utils.sheet_add_aoa(ws, data, { origin: `A${responseStartRow + 2}` });
+
+        // Create table and get next row position
+        currentRow = createTable(ws, [headers, ...data], currentRow, `Response_Step${stepIndex + 1}`);
       }
 
       // Add the worksheet to the workbook
@@ -266,7 +302,13 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
     });
 
     // Generate and download the Excel file
-    XLSX.writeFile(wb, `${scenarioName || 'scenario'}.xlsx`);
+    const wopts: XLSX.WritingOptions = { 
+      bookType: 'xlsx',
+      bookSST: false,
+      type: 'binary',
+      cellStyles: true
+    };
+    XLSX.writeFile(wb, `${scenarioName || 'scenario'}.xlsx`, wopts);
   };
 
   // --- Save Handler ---
