@@ -120,15 +120,50 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>((set, ge
   setFlowSteps: (steps) => set({ flowSteps: steps }),
 
   addFlowStep: (action) => {
-    // TODO: Initialize stepData based on action.type or fetched schema later
-    // For now, initialize with an empty array or a default row
-    // Initialize all data arrays for the new step
+    // Initialize default rows with all possible columns from the action's schema
+    const defaultParamsRow: StepRowData = {
+      id: `params-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    };
+
+    // Add all path parameters
+    action.pathPropertyListMap?.pathParamList?.forEach((param, index) => {
+      defaultParamsRow[`param_${param.technicalColumnName}_${index}`] = '';
+    });
+
+    // Add all query parameters
+    action.pathPropertyListMap?.queryParamList?.forEach((param, index) => {
+      defaultParamsRow[`query_${param.technicalColumnName}_${index}`] = '';
+    });
+
+    const defaultRequestRow: StepRowData = {
+      id: `request-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    };
+
+    // Add all request body fields
+    action.requestBodyColumnList?.forEach((col) => {
+      if (col.attributePath) {
+        defaultRequestRow[col.attributePath] = '';
+      }
+    });
+
+    const defaultResponseRow: StepRowData = {
+      id: `response-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    };
+
+    // Add all response body fields
+    action.responseBodyColumnList?.forEach((col) => {
+      if (col.attributePath) {
+        defaultResponseRow[col.attributePath] = '';
+      }
+    });
+
+    // Initialize all data arrays for the new step with default rows
     const newStep: ScenarioStep = {
       id: `step-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`, // More unique ID
       actionCode: action.actionCode,
-      stepParamsData: [], // Initialize empty
-      stepRequestData: [], // Initialize empty
-      stepResponseData: [], // Initialize empty
+      stepParamsData: [defaultParamsRow], // Initialize with default row
+      stepRequestData: [defaultRequestRow], // Initialize with default row
+      stepResponseData: [defaultResponseRow], // Initialize with default row
     };
     set((state) => ({ flowSteps: [...state.flowSteps, newStep] }));
   },

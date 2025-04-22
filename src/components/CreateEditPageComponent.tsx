@@ -21,11 +21,12 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useScenarioStore, Action, ScenarioDto } from '@/store/scenarioStore'; // Import ScenarioDto
+import { useScenarioStore, Action, ScenarioDto, StepRowData } from '@/store/scenarioStore'; // Import ScenarioDto and StepRowData
 // Import save and health check functions from API client
 import { saveScenarioTemporary, checkBackendHealth } from '@/services/apiClient';
 import { SortableStepItem } from '@/components/SortableStepItem';
 import Layout from '@/components/Layout'; // Import Layout
+import * as XLSX from 'xlsx';
 
 interface CreateEditPageProps {
   scenarioId?: string; // Optional scenarioId passed from the page route
@@ -134,50 +135,138 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
   const handleExport = () => {
     if (!currentScenarioId) {
       console.warn("Cannot export unsaved scenario.");
-      // Optionally show a user message/alert
       return;
     }
-    // Construct the backend URL
-    // Assuming backend runs on port 5001 during development
-    const exportUrl = `http://localhost:5001/api/scenarios/export/excel/${encodeURIComponent(currentScenarioId)}`;
-    console.log("Triggering export:", exportUrl);
 
-    // Trigger download by navigating or using fetch
-    // Direct navigation is simpler for GET requests triggering downloads
-    window.open(exportUrl, '_blank');
+    // Create a new workbook
+    const wb = XLSX.utils.book_new();
 
-    // Alternative using fetch (more complex handling of blob/filename):
-    // fetch(exportUrl)
-    //   .then(response => {
-    //     if (!response.ok) {
-    //       throw new Error(`Export failed: ${response.statusText}`);
-    //     }
-    //     // Extract filename from Content-Disposition header if possible
-    //     const disposition = response.headers.get('content-disposition');
-    //     let filename = `${currentScenarioId}.xlsx`; // Default filename
-    //     if (disposition && disposition.indexOf('attachment') !== -1) {
-    //       const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-    //       const matches = filenameRegex.exec(disposition);
-    //       if (matches != null && matches[1]) {
-    //         filename = matches[1].replace(/['"]/g, '');
-    //       }
-    //     }
-    //     return response.blob().then(blob => ({ blob, filename }));
-    //   })
-    //   .then(({ blob, filename }) => {
-    //     const url = window.URL.createObjectURL(blob);
-    //     const a = document.createElement('a');
-    //     a.href = url;
-    //     a.download = filename;
-    //     document.body.appendChild(a);
-    //     a.click();
-    //     a.remove();
-    //     window.URL.revokeObjectURL(url);
-    //   })
-    //   .catch(error => {
-    //     console.error("Export error:", error);
-    //     // Show error message to user
-    //   });
+    // Helper function to add spacing rows
+    const addSpacingRows = (worksheet: XLSX.WorkSheet, startRow: number, numRows: number) => {
+      for (let i = 0; i < numRows; i++) {
+        worksheet[`A${startRow + i}`] = { v: '' };
+      }
+    };
+
+    // Process each step
+    flowSteps.forEach((step, stepIndex) => {
+      const action = availableActions.find(a => a.actionCode === step.actionCode);
+      if (!action) return;
+
+      // Create a new worksheet for each step
+      const ws = XLSX.utils.aoa_to_sheet([]);
+      
+      // Add step header
+      ws['A1'] = { v: `Step ${stepIndex + 1}: ${action.actionCode}` };
+      ws['A2'] = { v: `Component: ${action.componentName}` };
+      ws['A3'] = { v: `Group: ${action.actionCodeGroupName}` };
+      
+      // Add spacing
+      addSpacingRows(ws, 4, 2);
+
+      // Process parameters
+      if (step.stepParamsData && step.stepParamsData.length > 0) {
+        ws['A6'] = { v: 'Parameters' };
+        
+        // Get all unique parameter names
+        const paramNames = new Set<string>();
+        step.stepParamsData.forEach((row: StepRowData) => {
+          Object.keys(row).forEach(key => {
+            if (key.startsWith('param_') || key.startsWith('query_')) {
+              paramNames.add(key);
+            }
+          });
+        });
+
+        // Add parameter headers
+        const headers = ['ID', ...Array.from(paramNames)];
+        XLSX.utils.sheet_add_aoa(ws, [headers], { origin: 'A7' });
+
+        // Add parameter data
+        const data = step.stepParamsData.map((row: StepRowData) => {
+          const rowData = [row.id];
+          paramNames.forEach(param => {
+            rowData.push(row[param] || '');
+          });
+          return rowData;
+        });
+        XLSX.utils.sheet_add_aoa(ws, data, { origin: 'A8' });
+      }
+
+      // Add spacing between sections
+      const lastRow = XLSX.utils.decode_range(ws['!ref'] || 'A1').e.r;
+      addSpacingRows(ws, lastRow + 2, 2);
+
+      // Process request body
+      if (step.stepRequestData && step.stepRequestData.length > 0) {
+        const requestStartRow = lastRow + 4;
+        ws[`A${requestStartRow}`] = { v: 'Request Body' };
+        
+        // Get all unique field names
+        const fieldNames = new Set<string>();
+        step.stepRequestData.forEach((row: StepRowData) => {
+          Object.keys(row).forEach(key => {
+            if (key !== 'id') {
+              fieldNames.add(key);
+            }
+          });
+        });
+
+        // Add request headers
+        const headers = ['ID', ...Array.from(fieldNames)];
+        XLSX.utils.sheet_add_aoa(ws, [headers], { origin: `A${requestStartRow + 1}` });
+
+        // Add request data
+        const data = step.stepRequestData.map((row: StepRowData) => {
+          const rowData = [row.id];
+          fieldNames.forEach(field => {
+            rowData.push(row[field] || '');
+          });
+          return rowData;
+        });
+        XLSX.utils.sheet_add_aoa(ws, data, { origin: `A${requestStartRow + 2}` });
+      }
+
+      // Add spacing between sections
+      const lastRow2 = XLSX.utils.decode_range(ws['!ref'] || 'A1').e.r;
+      addSpacingRows(ws, lastRow2 + 2, 2);
+
+      // Process response body
+      if (step.stepResponseData && step.stepResponseData.length > 0) {
+        const responseStartRow = lastRow2 + 4;
+        ws[`A${responseStartRow}`] = { v: 'Response Body' };
+        
+        // Get all unique field names
+        const fieldNames = new Set<string>();
+        step.stepResponseData.forEach((row: StepRowData) => {
+          Object.keys(row).forEach(key => {
+            if (key !== 'id') {
+              fieldNames.add(key);
+            }
+          });
+        });
+
+        // Add response headers
+        const headers = ['ID', ...Array.from(fieldNames)];
+        XLSX.utils.sheet_add_aoa(ws, [headers], { origin: `A${responseStartRow + 1}` });
+
+        // Add response data
+        const data = step.stepResponseData.map((row: StepRowData) => {
+          const rowData = [row.id];
+          fieldNames.forEach(field => {
+            rowData.push(row[field] || '');
+          });
+          return rowData;
+        });
+        XLSX.utils.sheet_add_aoa(ws, data, { origin: `A${responseStartRow + 2}` });
+      }
+
+      // Add the worksheet to the workbook
+      XLSX.utils.book_append_sheet(wb, ws, `Step ${stepIndex + 1}`);
+    });
+
+    // Generate and download the Excel file
+    XLSX.writeFile(wb, `${scenarioName || 'scenario'}.xlsx`);
   };
 
   // --- Save Handler ---
