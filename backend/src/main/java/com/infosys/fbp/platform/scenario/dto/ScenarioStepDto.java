@@ -26,6 +26,16 @@ public class ScenarioStepDto {
     private String actionCode;
 
     /**
+     * Description of the context before this step is executed.
+     */
+    private String beforeDescription;
+
+    /**
+     * Description of the expected outcome after this step is executed.
+     */
+    private String afterDescription;
+
+    /**
      * Data rows for the Path/Query Parameters grid for this step.
      */
     private List<ScenarioStepDataDto> stepParamsData;

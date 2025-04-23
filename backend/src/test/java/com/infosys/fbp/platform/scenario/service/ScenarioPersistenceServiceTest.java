@@ -103,8 +103,15 @@ class ScenarioPersistenceServiceTest {
     private ScenarioDto createTestScenario(String id, String name) {
         ScenarioStepDataDto stepData1 = new ScenarioStepDataDto("row1", Map.of("param1", "value1"));
         ScenarioStepDataDto stepData2 = new ScenarioStepDataDto("row2", Map.of("reqField", 123));
-        ScenarioStepDto step1 = new ScenarioStepDto("step1", "actionA", List.of(stepData1), List.of(stepData2), List.of());
-        // Use the updated ScenarioDto constructor/fields
+        ScenarioStepDto step1 = new ScenarioStepDto(
+            "step1", 
+            "actionA", 
+            "Context before step execution", 
+            "Expected outcome after step execution",
+            List.of(stepData1), 
+            List.of(stepData2), 
+            List.of()
+        );
         return new ScenarioDto(id, name, List.of(step1));
     }
 
@@ -151,5 +158,31 @@ class ScenarioPersistenceServiceTest {
         assertTrue(loadedScenarioOpt.isPresent());
         assertEquals("Updated Scenario", loadedScenarioOpt.get().getScenarioName()); // Verify overwrite
         assertEquals(scenario2.getSteps(), loadedScenarioOpt.get().getSteps());
+    }
+
+    @Test
+    void saveScenario_shouldPreserveStepDescriptions() {
+        // Arrange
+        String testId = "desc-test-id";
+        ScenarioDto scenario = createTestScenario(testId, "Description Test Scenario");
+
+        // Act
+        ScenarioDto savedScenario = service.saveScenario(scenario);
+
+        // Assert
+        assertNotNull(savedScenario);
+        assertEquals(1, savedScenario.getSteps().size());
+        
+        ScenarioStepDto savedStep = savedScenario.getSteps().get(0);
+        assertEquals("Context before step execution", savedStep.getBeforeDescription());
+        assertEquals("Expected outcome after step execution", savedStep.getAfterDescription());
+
+        // Verify descriptions are preserved when loading
+        Optional<ScenarioDto> loadedScenarioOpt = service.loadScenario(testId);
+        assertTrue(loadedScenarioOpt.isPresent());
+        
+        ScenarioStepDto loadedStep = loadedScenarioOpt.get().getSteps().get(0);
+        assertEquals("Context before step execution", loadedStep.getBeforeDescription());
+        assertEquals("Expected outcome after step execution", loadedStep.getAfterDescription());
     }
 }

@@ -133,8 +133,15 @@ class ScenarioPersistenceControllerIntegrationTest {
     private ScenarioDto createTestScenario(String id, String name) {
         ScenarioStepDataDto stepData1 = new ScenarioStepDataDto("rowA", Map.of("paramInteg", "valueInteg"));
         ScenarioStepDataDto stepData2 = new ScenarioStepDataDto("rowB", Map.of("reqInteg", 456));
-        ScenarioStepDto step1 = new ScenarioStepDto("stepInteg1", "actionInteg", List.of(stepData1), List.of(stepData2), List.of());
-        // Use updated DTO structure
+        ScenarioStepDto step1 = new ScenarioStepDto(
+            "stepInteg1", 
+            "actionInteg", 
+            "Integration test context before step", 
+            "Integration test expected outcome",
+            List.of(stepData1), 
+            List.of(stepData2), 
+            List.of()
+        );
         return new ScenarioDto(id, name, List.of(step1));
     }
 
@@ -204,5 +211,27 @@ class ScenarioPersistenceControllerIntegrationTest {
         //         hasProperty("scenarioId", is(id1)),
         //         hasProperty("scenarioId", is(id2))
         // )));
+    }
+
+    @Test
+    void saveScenario_shouldPreserveStepDescriptions() throws Exception {
+        // Arrange
+        String testId = "desc-integ-test-id";
+        ScenarioDto scenario = createTestScenario(testId, "Description Integration Test Scenario");
+        String scenarioJson = objectMapper.writeValueAsString(scenario);
+
+        // Act & Assert - Save scenario
+        mockMvc.perform(post("/api/scenarios/save")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(scenarioJson))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.steps[0].beforeDescription", is("Integration test context before step")))
+                .andExpect(jsonPath("$.steps[0].afterDescription", is("Integration test expected outcome")));
+
+        // Act & Assert - Load scenario
+        mockMvc.perform(get("/api/scenarios/load/{scenarioId}", testId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.steps[0].beforeDescription", is("Integration test context before step")))
+                .andExpect(jsonPath("$.steps[0].afterDescription", is("Integration test expected outcome")));
     }
 }
