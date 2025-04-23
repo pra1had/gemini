@@ -7,8 +7,8 @@ import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import DeleteIcon from '@mui/icons-material/Delete';
 // Import GridType and update store imports
 import { ScenarioStep, Action, StepRowData, GridType } from '@/store/scenarioStore';
-// Import the container component instead of the old grid
-import StepDataGridContainer from './StepDataGrid';
+// Import the new spreadsheet component
+import StepDataSpreadsheetContainer from './StepDataSpreadsheet';
 
 interface SortableStepItemProps {
   step: ScenarioStep; // Step object now contains stepParamsData, stepRequestData, stepResponseData
@@ -94,7 +94,7 @@ export const SortableStepItem: React.FC<SortableStepItemProps> = ({
             onChange={(e) => onUpdateDescription(step.id, 'before', e.target.value)}
             sx={{ mb: 2 }}
           />
-          <StepDataGridContainer
+          <StepDataSpreadsheetContainer
             step={step} // Pass the whole step object
             actionDetails={actionDetails}
             onUpdateGridData={onUpdateGridData} // Pass the updated store action handler
