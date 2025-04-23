@@ -150,6 +150,27 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
       return startRow + numRows;
     };
 
+    // Helper function to merge cells
+    const mergeCells = (ws: XLSX.WorkSheet, start: string, end: string) => {
+      if (!ws['!merges']) ws['!merges'] = [];
+      const startAddr = XLSX.utils.decode_cell(start);
+      const endAddr = XLSX.utils.decode_cell(end);
+      ws['!merges'].push({ 
+        s: { r: startAddr.r, c: startAddr.c }, 
+        e: { r: endAddr.r, c: endAddr.c } 
+      });
+    };
+
+    // Helper function to set column widths
+    const setColumnWidths = (ws: XLSX.WorkSheet, widths: { [key: string]: number }) => {
+      const cols: Array<{ wch: number }> = [];
+      Object.entries(widths).forEach(([col, width]) => {
+        const colIndex = XLSX.utils.decode_col(col);
+        cols[colIndex] = { wch: width };
+      });
+      ws['!cols'] = cols;
+    };
+
     // Helper function to create a table
     const createTable = (ws: XLSX.WorkSheet, data: any[][], startRow: number, tableName: string) => {
       // Add the data first
@@ -198,8 +219,41 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
       const ws = XLSX.utils.aoa_to_sheet([]);
       let currentRow = 1;
 
+      // Add before description with styling
+      if (step.beforeDescription) {
+        ws[`A${currentRow}`] = { 
+          v: 'Before Context:',
+          s: { font: { bold: true, italic: true }, fill: { fgColor: { rgb: 'F5F5F5' } } }
+        };
+        currentRow++;
+        ws[`A${currentRow}`] = { 
+          v: step.beforeDescription,
+          s: { font: { italic: true }, fill: { fgColor: { rgb: 'F5F5F5' } } }
+        };
+
+        // Merge cells for description
+        const lastCol = 'E'; // Merge across 5 columns
+        mergeCells(ws, `A${currentRow}`, `${lastCol}${currentRow}`);
+        mergeCells(ws, `A${currentRow-1}`, `${lastCol}${currentRow-1}`);
+
+        currentRow++;
+        currentRow = addSpacingRows(ws, currentRow, 1);
+      }
+
+      // Set column widths for better readability
+      setColumnWidths(ws, {
+        'A': 15, // First column
+        'B': 30, // Second column
+        'C': 30, // Third column
+        'D': 30, // Fourth column
+        'E': 30  // Fifth column
+      });
+
       // Add step header
-      ws[`A${currentRow}`] = { v: `Step ${stepIndex + 1}: ${action.actionCode}` };
+      ws[`A${currentRow}`] = { 
+        v: `Step ${stepIndex + 1}: ${action.actionCode}`,
+        s: { font: { bold: true } }
+      };
       currentRow++;
       ws[`A${currentRow}`] = { v: `Component: ${action.componentName}` };
       currentRow++;
@@ -207,7 +261,7 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
       currentRow++;
 
       // Add spacing after header
-      currentRow = addSpacingRows(ws, currentRow + 1, 2);
+      currentRow = addSpacingRows(ws, currentRow + 1, 1);
 
       // Process parameters
       if (step.stepParamsData && step.stepParamsData.length > 0) {
@@ -296,6 +350,43 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
 
         // Create table and get next row position
         currentRow = createTable(ws, [headers, ...data], currentRow, `Response_Step${stepIndex + 1}`);
+      }
+
+      console.log(`Step ${stepIndex + 1} after description:`, step.afterDescription);
+      console.log('Current row before after description:', currentRow);
+
+      // Add after description with styling
+      if (step.afterDescription) {
+        // Add spacing before after description
+        currentRow = addSpacingRows(ws, currentRow, 2);
+        console.log('Row after spacing:', currentRow);
+        
+        // Add after description header
+        ws[`A${currentRow}`] = { 
+          v: 'Expected Outcome:',
+          s: { font: { bold: true, italic: true }, fill: { fgColor: { rgb: 'F5F5F5' } } }
+        };
+        currentRow++;
+        
+        // Add after description content
+        ws[`A${currentRow}`] = { 
+          v: step.afterDescription,
+          s: { font: { italic: true }, fill: { fgColor: { rgb: 'F5F5F5' } } }
+        };
+
+        // Merge cells for description
+        const lastCol = 'E'; // Merge across 5 columns
+        mergeCells(ws, `A${currentRow}`, `${lastCol}${currentRow}`);
+        mergeCells(ws, `A${currentRow-1}`, `${lastCol}${currentRow-1}`);
+
+        // Ensure worksheet range includes the after description
+        const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+        range.e.r = Math.max(range.e.r, currentRow);
+        range.e.c = Math.max(range.e.c, XLSX.utils.decode_col('E'));
+        ws['!ref'] = XLSX.utils.encode_range(range);
+
+        console.log('Final row after adding description:', currentRow);
+        console.log('Worksheet range:', ws['!ref']);
       }
 
       // Add the worksheet to the workbook
