@@ -2,7 +2,6 @@ package com.infosys.fbp.platform.scenario.service;
 
 import com.infosys.fbp.platform.scenario.dto.ScenarioDto;
 import com.infosys.fbp.platform.scenario.dto.ScenarioStepDto;
-import com.infosys.fbp.platform.scenario.dto.ScenarioStepDataDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -101,8 +100,8 @@ class ScenarioPersistenceServiceTest {
 
     // Updated helper method to include scenarioId
     private ScenarioDto createTestScenario(String id, String name) {
-        ScenarioStepDataDto stepData1 = new ScenarioStepDataDto("row1", Map.of("param1", "value1"));
-        ScenarioStepDataDto stepData2 = new ScenarioStepDataDto("row2", Map.of("reqField", 123));
+        Map<String, String> stepData1 = Map.of("id", "params-1745418387697-7hj7f", "param_code_0", "1234", "query_targetSystemCode_0", "", "query_collectionMethodCode_1", "");
+        Map<String, String> stepData2 = Map.of("id", "request-1745418387697-7hj7f", "field1", "value1", "field2", "value2");
         ScenarioStepDto step1 = new ScenarioStepDto(
             "step1", 
             "actionA", 

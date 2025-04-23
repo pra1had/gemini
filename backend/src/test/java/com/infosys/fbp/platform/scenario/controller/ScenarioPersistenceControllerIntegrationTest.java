@@ -2,13 +2,10 @@ package com.infosys.fbp.platform.scenario.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.infosys.fbp.platform.scenario.dto.ScenarioDto;
-import com.infosys.fbp.platform.scenario.dto.ScenarioStepDataDto;
 import com.infosys.fbp.platform.scenario.dto.ScenarioStepDto;
-import com.infosys.fbp.platform.scenario.service.ScenarioPersistenceService; // Added import
-import org.junit.jupiter.api.BeforeEach; // Added import
+import com.infosys.fbp.platform.scenario.service.ScenarioPersistenceService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,14 +14,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.util.Collection; // Added import
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue; // Added import
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -40,11 +37,10 @@ class ScenarioPersistenceControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private ScenarioPersistenceService persistenceService; // Added service injection
+    private ScenarioPersistenceService persistenceService;
 
     @BeforeEach
     void setUp() {
-        // Clear the in-memory store before each test
         persistenceService.clearAllScenarios();
     }
 
@@ -98,7 +94,8 @@ class ScenarioPersistenceControllerIntegrationTest {
         // Act & Assert
         mockMvc.perform(get("/api/scenarios/load/{scenarioId}", nonExistentId))
                 .andExpect(status().isNotFound());
-    } // <-- Add missing closing brace here
+    }
+
     // Updated test: Checks specifically for missing/empty scenarioId
     @Test
     void saveScenario_shouldReturnBadRequest_whenIdIsNull() throws Exception {
@@ -129,10 +126,9 @@ class ScenarioPersistenceControllerIntegrationTest {
                 .andExpect(jsonPath("$.error", is("Scenario ID cannot be null or empty")));
     }
 
-     // Updated helper method to include scenarioId
     private ScenarioDto createTestScenario(String id, String name) {
-        ScenarioStepDataDto stepData1 = new ScenarioStepDataDto("rowA", Map.of("paramInteg", "valueInteg"));
-        ScenarioStepDataDto stepData2 = new ScenarioStepDataDto("rowB", Map.of("reqInteg", 456));
+        Map<String, String> stepData1 = Map.of("id", "params-1745418387697-7hj7f", "param_code_0", "1234", "query_targetSystemCode_0", "", "query_collectionMethodCode_1", "");
+        Map<String, String> stepData2 = Map.of("id", "request-1745418387697-7hj7f", "field1", "value1", "field2", "value2");
         ScenarioStepDto step1 = new ScenarioStepDto(
             "stepInteg1", 
             "actionInteg", 

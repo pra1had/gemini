@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents a single step within a scenario flow.
@@ -38,16 +39,16 @@ public class ScenarioStepDto {
     /**
      * Data rows for the Path/Query Parameters grid for this step.
      */
-    private List<ScenarioStepDataDto> stepParamsData;
+    private List<Map<String, String>> stepParamsData;
 
     /**
      * Data rows for the Request Body grid for this step.
      */
-    private List<ScenarioStepDataDto> stepRequestData;
+    private List<Map<String, String>> stepRequestData;
 
     /**
      * Data rows for the Response Body Verification grid for this step.
      */
-    private List<ScenarioStepDataDto> stepResponseData;
+    private List<Map<String, String>> stepResponseData;
 
 }
