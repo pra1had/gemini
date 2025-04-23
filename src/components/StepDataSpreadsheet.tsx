@@ -33,7 +33,7 @@ const SingleSpreadsheetComponent: React.FC<SingleSpreadsheetComponentProps> = ({
 }) => {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
-  // Convert rows to spreadsheet data format
+  // Convert rows to spreadsheet data format, excluding the 'id' field
   const spreadsheetData = rows.map(row => {
     return columns.map(col => {
       const value = row[col] || '';
@@ -41,9 +41,10 @@ const SingleSpreadsheetComponent: React.FC<SingleSpreadsheetComponentProps> = ({
     });
   });
 
-  // Handle data changes
+  // Handle data changes while preserving the id
   const handleDataChange = (data: any) => {
     const updatedRows = data.map((row: any[], rowIndex: number) => {
+      // Preserve the existing id or generate a new one
       const newRow: StepRowData = { id: rows[rowIndex]?.id || `${gridType}-new-${Date.now()}-${rowIndex}` };
       columns.forEach((col, colIndex) => {
         newRow[col] = row[colIndex]?.value || '';
@@ -238,7 +239,8 @@ const SingleSpreadsheetComponent: React.FC<SingleSpreadsheetComponentProps> = ({
 };
 
 const generateColumns = (actionDetails: Action, gridType: GridType): string[] => {
-  const columns: string[] = ['id'];
+  // Initialize columns array without 'id' - it will still be in the data but not displayed
+  const columns: string[] = [];
 
   if (gridType === 'params') {
     actionDetails.pathPropertyListMap?.pathParamList?.forEach((param: ParameterInfo, index: number) => {
