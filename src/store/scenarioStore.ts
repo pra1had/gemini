@@ -52,6 +52,8 @@ export type GridType = 'params' | 'request' | 'response'; // Type to identify th
 export interface ScenarioStep {
   id: string; // Unique ID for the step instance in the flow
   actionCode: string; // Reference the Action using its actionCode
+  beforeDescription: string; // Description of the context before this step
+  afterDescription: string; // Description of the expected outcome after this step
   stepParamsData: StepRowData[]; // Data for Path/Query Params grid
   stepRequestData: StepRowData[]; // Data for Request Body grid
   stepResponseData: StepRowData[]; // Data for Response Body grid (verification)
@@ -82,6 +84,7 @@ interface ScenarioActions {
   removeFlowStep: (stepId: string) => void;
   // Updated action to specify which grid's data to update
   updateStepGridData: (stepId: string, gridType: GridType, newGridData: StepRowData[]) => void;
+  updateStepDescription: (stepId: string, type: 'before' | 'after', description: string) => void;
   reorderFlowSteps: (steps: ScenarioStep[]) => void;
   toggleStepExpansion: (stepId: string) => void;
   setCurrentScenarioId: (id: string | null) => void; // Action to set ID from input
@@ -161,6 +164,8 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>((set, ge
     const newStep: ScenarioStep = {
       id: `step-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`, // More unique ID
       actionCode: action.actionCode,
+      beforeDescription: '',
+      afterDescription: '',
       stepParamsData: [defaultParamsRow], // Initialize with default row
       stepRequestData: [defaultRequestRow], // Initialize with default row
       stepResponseData: [defaultResponseRow], // Initialize with default row
@@ -195,6 +200,21 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>((set, ge
     }));
   },
 
+  updateStepDescription: (stepId, type, description) => {
+    set((state) => ({
+      flowSteps: state.flowSteps.map((step) => {
+        if (step.id === stepId) {
+          return {
+            ...step,
+            beforeDescription: type === 'before' ? description : step.beforeDescription,
+            afterDescription: type === 'after' ? description : step.afterDescription,
+          };
+        }
+        return step;
+      }),
+    }));
+  },
+
   reorderFlowSteps: (steps) => {
     set({ flowSteps: steps });
   },
@@ -209,39 +229,37 @@ export const useScenarioStore = create<ScenarioState & ScenarioActions>((set, ge
 
   // Updated loadScenario to fetch from the backend
   loadScenario: async (scenarioId) => {
-    if (scenarioId) {
-      // Loading existing scenario
-      set({ isEditMode: true, currentScenarioId: scenarioId, scenarioName: 'Loading...', flowSteps: [] });
-      try {
-        const loadedScenario = await loadScenarioTemporary(scenarioId); // Call API client
-        // Ensure loaded steps have initialized grid data arrays if they are missing/null from backend
-        const sanitizedSteps = loadedScenario.steps.map((step: ScenarioStep) => ({ // Add type annotation for step
+    if (!scenarioId) {
+      set({ currentScenarioId: null, flowSteps: [], scenarioName: '' });
+      return;
+    }
+
+    try {
+      const scenario = await loadScenarioTemporary(scenarioId);
+      set({
+        currentScenarioId: scenarioId,
+        scenarioName: scenario.scenarioName,
+        flowSteps: scenario.steps.map(step => ({
           ...step,
-          stepParamsData: step.stepParamsData || [],
-          stepRequestData: step.stepRequestData || [],
-          stepResponseData: step.stepResponseData || [],
-        }));
-        set({
-          scenarioName: loadedScenario.scenarioName,
-          flowSteps: sanitizedSteps, // Use fetched and sanitized steps
-          // Keep isEditMode and currentScenarioId
-        });
-      } catch (error) {
-        console.error(`Failed to load scenario ${scenarioId}:`, error);
-        // Handle error state - maybe reset or show an error message
-        set({ scenarioName: `Error loading scenario ${scenarioId}`, flowSteps: [], currentScenarioId: null, isEditMode: false });
-      }
-    } else {
-      // Resetting for creating a new scenario
-      get().resetStore(); // Calls the updated resetStore below
-      set({ scenarioName: 'New Scenario', isEditMode: false }); // Explicitly set edit mode false
+          beforeDescription: step.beforeDescription || '',
+          afterDescription: step.afterDescription || '',
+        })),
+      });
+    } catch (error) {
+      console.error('Failed to load scenario:', error);
+      // Optionally set some error state in the store
+      set({ currentScenarioId: null, flowSteps: [], scenarioName: '' });
     }
   },
 
   // Updated resetStore to clear currentScenarioId as well
   resetStore: () => {
     set({
-      ...initialState // Reset to initial state which includes currentScenarioId: null
+      ...initialState,
+      flowSteps: [],
+      scenarioName: '',
+      currentScenarioId: null,
+      expandedStepId: null,
     });
   },
 }));

@@ -51,6 +51,7 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
   const fetchAndSetAvailableActions = useScenarioStore((state) => state.fetchAndSetAvailableActions); // Get the fetch action
   // Ensure we are using the correct update action name from the store
   const updateStepGridData = useScenarioStore((state) => state.updateStepGridData);
+  const updateStepDescription = useScenarioStore((state) => state.updateStepDescription); // Add this line
   // Need setFlowSteps, setScenarioName, and setCurrentScenarioId
   const setFlowSteps = useScenarioStore((state) => state.setFlowSteps);
   const setScenarioName = useScenarioStore((state) => state.setScenarioName);
@@ -464,7 +465,8 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
                          onRemove={removeFlowStep}
                          expandedStepId={expandedStepId}
                          onToggleExpansion={toggleStepExpansion}
-                         onUpdateGridData={updateStepGridData} // Pass the correct update function
+                         onUpdateGridData={updateStepGridData}
+                         onUpdateDescription={updateStepDescription}
                        />
                      ))}
                    </SortableContext>

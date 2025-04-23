@@ -2,7 +2,7 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Paper, Grid, Typography, IconButton } from '@mui/material';
+import { Paper, Grid, Typography, IconButton, TextField } from '@mui/material';
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import DeleteIcon from '@mui/icons-material/Delete';
 // Import GridType and update store imports
@@ -19,6 +19,7 @@ interface SortableStepItemProps {
   onToggleExpansion: (stepId: string) => void;
   // Update prop name to match the new store action
   onUpdateGridData: (stepId: string, gridType: GridType, newGridData: StepRowData[]) => void;
+  onUpdateDescription: (stepId: string, type: 'before' | 'after', description: string) => void;
 }
 
 export const SortableStepItem: React.FC<SortableStepItemProps> = ({
@@ -29,6 +30,7 @@ export const SortableStepItem: React.FC<SortableStepItemProps> = ({
   expandedStepId,
   onToggleExpansion,
   onUpdateGridData, // Destructure the updated prop
+  onUpdateDescription,
 }) => {
   const isExpanded = expandedStepId === step.id;
 
@@ -82,11 +84,30 @@ export const SortableStepItem: React.FC<SortableStepItemProps> = ({
       </Grid>
       {isExpanded && (
         <Paper elevation={0} sx={{ p: 2, mt: 1, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
-          {/* Render the container component */}
+          <TextField
+            fullWidth
+            multiline
+            rows={2}
+            label="Before Description"
+            placeholder="Describe the context before this step..."
+            value={step.beforeDescription}
+            onChange={(e) => onUpdateDescription(step.id, 'before', e.target.value)}
+            sx={{ mb: 2 }}
+          />
           <StepDataGridContainer
             step={step} // Pass the whole step object
             actionDetails={actionDetails}
             onUpdateGridData={onUpdateGridData} // Pass the updated store action handler
+          />
+          <TextField
+            fullWidth
+            multiline
+            rows={2}
+            label="After Description"
+            placeholder="Describe the expected outcome after this step..."
+            value={step.afterDescription}
+            onChange={(e) => onUpdateDescription(step.id, 'after', e.target.value)}
+            sx={{ mt: 2 }}
           />
         </Paper>
       )}
