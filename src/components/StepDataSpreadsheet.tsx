@@ -20,6 +20,7 @@ interface SingleSpreadsheetComponentProps {
   columns: string[];
   onUpdateGridData: (stepId: string, gridType: GridType, newGridData: StepRowData[]) => void;
   actionDetails: Action;
+  onActivate?: (point: any) => void;
 }
 
 const SingleSpreadsheetComponent: React.FC<SingleSpreadsheetComponentProps> = ({
@@ -30,6 +31,7 @@ const SingleSpreadsheetComponent: React.FC<SingleSpreadsheetComponentProps> = ({
   columns,
   onUpdateGridData,
   actionDetails,
+  onActivate,
 }) => {
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
 
@@ -228,8 +230,16 @@ const SingleSpreadsheetComponent: React.FC<SingleSpreadsheetComponentProps> = ({
             if (point && typeof point === 'object' && 'row' in point) {
               setSelectedRow(point.row);
             } else {
-              setSelectedRow(null);
+              // Keep existing selection if the new selection point is invalid or null
+              // setSelectedRow(null); // Comment out or remove this line if needed
             }
+          }}
+          onActivate={(point: any) => {
+            if (point && typeof point === 'object' && 'row' in point) {
+              setSelectedRow(point.row);
+            }
+             // Optionally, decide what to do if activation point is invalid
+             // else { setSelectedRow(null); }
           }}
           columnLabels={columns}
         />
@@ -293,6 +303,11 @@ const StepDataSpreadsheetContainer: React.FC<StepDataSpreadsheetContainerProps> 
         columns={paramsColumns}
         onUpdateGridData={onUpdateGridData}
         actionDetails={actionDetails}
+        onActivate={(point) => {
+           if (point && typeof point === 'object' && 'row' in point) {
+              // Need access to setSelectedRow here
+           }
+        }}
       />
 
       {/* Request Body Grid */}
@@ -304,6 +319,11 @@ const StepDataSpreadsheetContainer: React.FC<StepDataSpreadsheetContainerProps> 
         columns={requestColumns}
         onUpdateGridData={onUpdateGridData}
         actionDetails={actionDetails}
+        onActivate={(point) => {
+           if (point && typeof point === 'object' && 'row' in point) {
+              // Need access to setSelectedRow here
+           }
+        }}
       />
 
       {/* Response Body Grid */}
@@ -315,6 +335,11 @@ const StepDataSpreadsheetContainer: React.FC<StepDataSpreadsheetContainerProps> 
         columns={responseColumns}
         onUpdateGridData={onUpdateGridData}
         actionDetails={actionDetails}
+        onActivate={(point) => {
+           if (point && typeof point === 'object' && 'row' in point) {
+              // Need access to setSelectedRow here
+           }
+        }}
       />
     </Box>
   );
