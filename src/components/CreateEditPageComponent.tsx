@@ -6,6 +6,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FileDownloadIcon from '@mui/icons-material/FileDownload'; // Icon for export button
+import HtmlIcon from '@mui/icons-material/Html'; // Icon for HTML export
 import {
   DndContext,
   closestCenter,
@@ -21,7 +22,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useScenarioStore, Action, ScenarioDto, StepRowData } from '@/store/scenarioStore'; // Import ScenarioDto and StepRowData
+import { useScenarioStore, Action, ScenarioDto, StepRowData, GridType } from '@/store/scenarioStore'; // Import ScenarioDto and StepRowData
 // Import save and health check functions from API client
 import { saveScenarioTemporary, checkBackendHealth } from '@/services/apiClient';
 import { SortableStepItem } from '@/components/SortableStepItem';
@@ -403,6 +404,124 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
     XLSX.writeFile(wb, `${scenarioName || 'scenario'}.xlsx`, wopts);
   };
 
+  // --- HTML Export Handler ---
+  const handleExportHtml = () => {
+    if (!currentScenarioId) {
+      console.warn("Cannot export unsaved scenario.");
+      return; // Or handle differently, maybe allow export of current state
+    }
+
+    const scenario = {
+      scenarioId: currentScenarioId,
+      scenarioName: scenarioName,
+      steps: flowSteps,
+    };
+
+    const generateHtml = (data: ScenarioDto): string => {
+      let html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scenario: ${data.scenarioName} (${data.scenarioId})</title>
+  <style>
+    body { font-family: sans-serif; line-height: 1.6; margin: 20px; }
+    h1, h2, h3 { color: #333; }
+    h2 { border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 30px; }
+    h3 { margin-top: 20px; color: #555; }
+    .step { border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px; background-color: #f9f9f9; }
+    .description { background-color: #eef; padding: 10px; border-radius: 3px; margin-bottom: 10px; font-style: italic; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    pre { background-color: #eee; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    .grid-container { margin-top: 15px; }
+    .empty-grid { color: #888; }
+  </style>
+</head>
+<body>
+  <h1>Scenario: ${data.scenarioName} (${data.scenarioId})</h1>
+`;
+
+      data.steps.forEach((step, index) => {
+        const action = availableActions.find(a => a.actionCode === step.actionCode);
+        html += `
+  <div class="step">
+    <h2>Step ${index + 1}: ${step.actionCode}${action ? ` (${action.type})` : ''}</h2>
+    ${step.beforeDescription ? `<div class="description"><strong>Before:</strong> ${step.beforeDescription}</div>` : ''}
+
+    ${generateGridHtml('Parameters', step.stepParamsData)}
+    ${generateGridHtml('Request Body', step.stepRequestData)}
+    ${generateGridHtml('Response Verification', step.stepResponseData)}
+
+    ${step.afterDescription ? `<div class="description"><strong>After:</strong> ${step.afterDescription}</div>` : ''}
+  </div>
+`;
+      });
+
+      html += `
+</body>
+</html>
+`;
+      return html;
+    };
+
+    const generateGridHtml = (title: string, gridData: StepRowData[]): string => {
+        if (!gridData || gridData.length === 0 || Object.keys(gridData[0]).length <= 1) { // Check if grid is empty or only has 'id'
+             return `<div class="grid-container"><h3>${title}</h3><p class="empty-grid">No data.</p></div>`;
+        }
+
+        const headers = Object.keys(gridData[0]).filter(key => key !== 'id'); // Exclude 'id' column
+        if (headers.length === 0 && gridData.length > 0) {
+            // Handle case where rows exist but have no columns other than id (e.g., after adding a row but before defining columns)
+            return `<div class="grid-container"><h3>${title}</h3><p class="empty-grid">No columns defined or data entered.</p></div>`;
+        }
+         if (headers.length === 0) { // Extra check if headers somehow ended up empty
+            return `<div class="grid-container"><h3>${title}</h3><p class="empty-grid">No data columns found.</p></div>`;
+        }
+
+
+        let tableHtml = `<div class="grid-container"><h3>${title}</h3><table><thead><tr>`;
+        headers.forEach(header => {
+            tableHtml += `<th>${header}</th>`;
+        });
+        tableHtml += `</tr></thead><tbody>`;
+
+        gridData.forEach(row => {
+            tableHtml += `<tr>`;
+            headers.forEach(header => {
+                // Basic handling for non-string data, improve as needed
+                const cellValue = row[header];
+                const displayValue = (cellValue === null || cellValue === undefined) ? '' : String(cellValue);
+                tableHtml += `<td>${displayValue}</td>`; // Simple string conversion
+            });
+            tableHtml += `</tr>`;
+        });
+
+        tableHtml += `</tbody></table></div>`;
+        return tableHtml;
+    };
+
+
+    try {
+      const htmlContent = generateHtml(scenario);
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `scenario-${scenario.scenarioId}-${scenario.scenarioName || 'export'}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      console.log("HTML export initiated.");
+    } catch (error) {
+      console.error("Failed to generate or download HTML:", error);
+      // Optionally show an error message to the user
+    }
+  };
+
   // --- Save Handler ---
   const handleSave = async () => {
     console.log("Attempting to save scenario...");
@@ -439,15 +558,26 @@ const CreateEditPageComponent: React.FC<CreateEditPageProps> = ({ scenarioId }) 
           <Typography variant="h4">
             {isEditMode ? `Edit Scenario: ${scenarioName}` : 'Create New Scenario'}
           </Typography> {/* Close Typography tag here */}
-          {/* Add Export Button Here */}
-          <Button
-            variant="outlined"
-            startIcon={<FileDownloadIcon />}
-            onClick={handleExport}
-            disabled={!currentScenarioId} // Disable if no scenario ID (not saved yet)
-          >
-            Export to Excel
-          </Button>
+          {/* Add Export Buttons Here */}
+          <Box> {/* Wrap buttons in a Box for layout */}
+            <Button
+              variant="outlined"
+              startIcon={<FileDownloadIcon />}
+              onClick={handleExport}
+              disabled={!currentScenarioId} // Disable if no scenario ID (not saved yet)
+              sx={{ mr: 1 }} // Add margin between buttons
+            >
+              Export to Excel
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<HtmlIcon />} // Use HTML icon
+              onClick={handleExportHtml}
+              disabled={!currentScenarioId} // Disable if no scenario ID
+            >
+              Download as HTML
+            </Button>
+          </Box>
         </Box>
         {/* Add Scenario ID and Name inputs */}
         <Grid container spacing={2} sx={{ mb: 2 }}>
